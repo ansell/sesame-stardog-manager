@@ -1,0 +1,36 @@
+<!--
+	Copyright Commonwealth Scientific and Industrial Research Organisation 2014
+
+	Licensed under the terms of the Apache License, Version 2.0.
+
+	See LICENSE file for more details.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.sonatype.oss</groupId>
+		<artifactId>oss-parent</artifactId>
+		<version>7</version>
+	</parent>
+	<groupId>com.github.ansell.stardog</groupId>
+	<artifactId>sesame-stardog-manager</artifactId>
+	<name>Sesame Repository Manager on Stardog</name>
+	<description>A Sesame RepositoryManager implementation backed by Stardog.</description>
+
+	<dependencies>
+		<dependency>
+			<groupId>com.complexible.stardog</groupId>
+			<artifactId>sesame</artifactId>
+			<version>2.2</version>
+			<exclusions>
+				<exclusion>
+					<!-- Depends on this as if it were a jar artifact, when it is a pom -->
+					<artifactId>sesame</artifactId>
+					<groupId>org.openrdf.sesame</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+	</dependencies>
+
+</project>
