@@ -1,10 +1,6 @@
-<!--
-	Copyright Commonwealth Scientific and Industrial Research Organisation 2014
-
-	Licensed under the terms of the Apache License, Version 2.0.
-
-	See LICENSE file for more details.
--->
+<!-- Copyright Commonwealth Scientific and Industrial Research Organisation 
+	2014 Licensed under the terms of the Apache License, Version 2.0. See LICENSE 
+	file for more details. -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
@@ -19,6 +15,10 @@
 	<name>Sesame Repository Manager on Stardog</name>
 	<description>A Sesame RepositoryManager implementation backed by Stardog.</description>
 
+	<properties>
+		<sesame.version>2.7.13-SNAPSHOT</sesame.version>
+	</properties>
+
 	<dependencies>
 		<dependency>
 			<groupId>com.complexible.stardog</groupId>
@@ -32,6 +32,25 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+		<dependency>
+			<groupId>org.openrdf.sesame</groupId>
+			<artifactId>sesame-repository-manager</artifactId>
+		</dependency>
 	</dependencies>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.openrdf.sesame</groupId>
+				<artifactId>sesame-bom</artifactId>
+				<version>${sesame.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.openrdf.sesame</groupId>
+				<artifactId>sesame-repository-manager</artifactId>
+				<version>${sesame.version}</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 
 </project>
