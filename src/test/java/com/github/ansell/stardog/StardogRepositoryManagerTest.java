@@ -11,6 +11,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import com.complexible.common.protocols.server.Server;
+import com.complexible.stardog.Stardog;
 import com.complexible.stardog.protocols.snarl.SNARLProtocolConstants;
 
 /**
