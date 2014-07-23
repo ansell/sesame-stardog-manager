@@ -42,6 +42,22 @@
 
 	<dependencies>
 		<dependency>
+			<groupId>com.complexible.stardog</groupId>
+			<artifactId>core</artifactId>
+			<version>2.2</version>
+			<exclusions>
+				<exclusion>
+					<!-- Depends on this as if it were a jar artifact, when it is a pom -->
+					<artifactId>sesame</artifactId>
+					<groupId>org.openrdf.sesame</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>jsonld-java</artifactId>
+					<groupId>dfki.km.json</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
 			<groupId>com.complexible.stardog.protocols.snarl</groupId>
 			<artifactId>server</artifactId>
 			<version>2.2</version>
