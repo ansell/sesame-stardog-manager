@@ -8,25 +8,22 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryException;
-import org.openrdf.repository.config.RepositoryConfig;
 import org.openrdf.repository.config.RepositoryConfigException;
 import org.openrdf.repository.manager.RepositoryInfo;
 import org.openrdf.repository.manager.RepositoryManager;
+import org.openrdf.repository.manager.SystemRepository;
 
 import com.complexible.stardog.StardogException;
 import com.complexible.stardog.api.ConnectionConfiguration;
-import com.complexible.stardog.api.admin.AdminConnection;
 import com.complexible.stardog.api.admin.AdminConnectionConfiguration;
 import com.complexible.stardog.sesame.StardogRepository;
 
 /**
- *
+ * An implementation of {@link RepositoryManager} backed by a Stardog database.
  *
  * @author Peter Ansell p_ansell@yahoo.com
  */
@@ -34,12 +31,15 @@ public class StardogRepositoryManager extends RepositoryManager
 {
     private AdminConnectionConfiguration adminConn;
     private ConnectionConfiguration connConn;
+    private URL serverUrl;
     
-    public StardogRepositoryManager(AdminConnectionConfiguration adminConn, ConnectionConfiguration connConn)
+    public StardogRepositoryManager(AdminConnectionConfiguration adminConn, ConnectionConfiguration connConn,
+            URL serverUrl)
     {
         super(new ConcurrentHashMap<String, Repository>());
         this.adminConn = adminConn;
         this.connConn = connConn;
+        this.serverUrl = serverUrl;
     }
     
     @Override
@@ -55,9 +55,7 @@ public class StardogRepositoryManager extends RepositoryManager
     {
         try
         {
-            Collection<String> list = adminConn.connect().list();
-            
-            for(String nextRepo : list)
+            for(String nextRepo : adminConn.connect().list())
             {
                 if(nextRepo.equals(id))
                 {
@@ -80,9 +78,7 @@ public class StardogRepositoryManager extends RepositoryManager
     {
         try
         {
-            Collection<String> list = adminConn.connect().list();
-            
-            for(String nextRepo : list)
+            for(String nextRepo : adminConn.connect().list())
             {
                 if(nextRepo.equals(id))
                 {
@@ -109,20 +105,21 @@ public class StardogRepositoryManager extends RepositoryManager
     {
         try
         {
-            Collection<String> list = adminConn.connect().list();
-            Collection<RepositoryInfo> result = new ArrayList<RepositoryInfo>(list.size());
+            Collection<RepositoryInfo> result = new ArrayList<RepositoryInfo>();
             
-            for(String nextRepo : list)
+            for(String nextRepo : adminConn.connect().list())
             {
-                if(!skipSystemRepo || !(skipSystemRepo && nextRepo.equals("SYSTEM")))
+                if(skipSystemRepo && nextRepo.equals(SystemRepository.ID))
                 {
-                    RepositoryInfo nextResult = new RepositoryInfo();
-                    nextResult.setId(nextRepo);
-                    nextResult.setDescription(nextRepo);
-                    // TODO: How do we know what URL adminConn/connConn are using from their public
-                    // methods?
-                    // result.setLocation(url);
+                    continue;
                 }
+                
+                RepositoryInfo nextResult = new RepositoryInfo();
+                nextResult.setId(nextRepo);
+                nextResult.setDescription(nextRepo);
+                // TODO: How do we know what URL adminConn/connConn are using from their public
+                // methods?
+                // result.setLocation(url);
             }
             return result;
         }
@@ -135,15 +132,20 @@ public class StardogRepositoryManager extends RepositoryManager
     @Override
     protected void cleanUpRepository(String repositoryID) throws IOException
     {
-        // TODO Auto-generated method stub
-        
+        try
+        {
+            adminConn.connect().drop(repositoryID);
+        }
+        catch(StardogException e)
+        {
+            throw new IOException(e);
+        }
     }
     
     @Override
     public URL getLocation() throws MalformedURLException
     {
-        // TODO Auto-generated method stub
-        return null;
+        return serverUrl;
     }
     
 }
