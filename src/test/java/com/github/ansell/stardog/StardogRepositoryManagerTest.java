@@ -21,13 +21,15 @@ import com.complexible.stardog.protocols.snarl.SNARLProtocolConstants;
 public class StardogRepositoryManagerTest
 {
     
+    private Server aServer;
+
     /**
      * @throws java.lang.Exception
      */
     @Before
     public void setUp() throws Exception
     {
-        Server aServer = Stardog.buildServer().bind(SNARLProtocolConstants.EMBEDDED_ADDRESS).start();
+        aServer = Stardog.buildServer().bind(SNARLProtocolConstants.EMBEDDED_ADDRESS).start();
     }
     
     /**
@@ -36,6 +38,7 @@ public class StardogRepositoryManagerTest
     @After
     public void tearDown() throws Exception
     {
+        aServer.stop();
     }
     
     /**
