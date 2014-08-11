@@ -55,6 +55,14 @@
 					<artifactId>jsonld-java</artifactId>
 					<groupId>dfki.km.json</groupId>
 				</exclusion>
+				<exclusion>
+					<artifactId>license</artifactId>
+					<groupId>com.clarkparsia</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>erg</artifactId>
+					<groupId>com.complexible.erg</groupId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>
@@ -70,6 +78,10 @@
 				<exclusion>
 					<artifactId>jsonld-java</artifactId>
 					<groupId>dfki.km.json</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>dbms</artifactId>
+					<groupId>com.complexible.stardog</groupId>
 				</exclusion>
 			</exclusions>
 		</dependency>
