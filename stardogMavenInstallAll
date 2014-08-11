@@ -1,0 +1,215 @@
+#!/bin/bash
+
+RELBINDIR="`dirname \"$0\"`"
+BINDIR="`( cd \"$RELBINDIR\" && pwd )`"
+if [ -z "$BINDIR" ] ; then
+  echo "$0: Path of executable is not accessible." >&2
+  exit 1
+fi
+DISTDIR=~/temp/stardog-2.2/
+#DISTDIR=$BINDIR/..
+
+TEMPLATENAME="`basename $0`"
+if [ -z "$TEMPLATENAME" ] ; then
+  echo "$0: Can't get basename of this file." >&2
+  exit 1
+fi
+
+TMPDIRECTORY="`mktemp -d /tmp/${TEMPLATENAME}.XXXXXX`"
+if [ -z "$TMPDIRECTORY" ] ; then
+  echo "$0: Can't create temporary directory." >&2
+  exit 1
+fi
+
+hash unzip 2>/dev/null || { echo >&2 "$0 requires unzip but it's not installed - aborting."; exit 1; }
+
+# Install artifacts that have a POM
+while read ARTIFACT; do
+    if [[ "${ARTIFACT:0:1}" != "#" ]]; then
+        unzip $DISTDIR/$ARTIFACT 'META-INF/maven/*' -d $TMPDIRECTORY
+        POMFILE="`find $TMPDIRECTORY -name pom.xml -print`"
+        mvn install:install-file -Dfile=$DISTDIR/$ARTIFACT -DpomFile=$POMFILE
+        rm -rf $TMPDIRECTORY/META-INF
+    fi
+done <<!
+client/api/cp-common-openrdf-2.0.4.jar
+client/api/cp-common-utils-3.1.1.jar
+client/api/data-exporter-1.0.0.jar
+client/api/jsonld-java-1.0.1-SNAPSHOT.jar
+client/api/jsonld-java-sesame-1.0.1-SNAPSHOT.jar
+client/api/openrdf-sesame-2.7.12.jar
+client/api/protocols-api-client-2.2.jar
+client/api/protocols-api-shared-2.2.jar
+client/api/stardog-common-rdf-2.2.jar
+client/api/stardog-common-utils-2.2.jar
+client/api/stardog-icv-core-api-2.2.jar
+client/api/stardog-openrdf-utils-2.2.jar
+client/api/stardog-protocols-spec-client-2.2.jar
+client/api/stardog-protocols-spec-shared-2.2.jar
+client/api/stardog-reasoning-api-2.2.jar
+client/api/stardog-reasoning-shared-2.2.jar
+client/api/stardog-search-api-2.2.jar
+client/api/stardog-shared-2.2.jar
+client/api/stardog-snarl-api-2.2.jar
+client/empire/empire-0.8.6.jar
+client/empire/stardog-empire-2.2.jar
+client/http/stardog-http-client-2.2.jar
+client/http/stardog-http-shared-2.2.jar
+client/http/stardog-icv-http-client-2.2.jar
+client/http/stardog-reasoning-http-client-2.2.jar
+client/http/stardog-search-http-client-2.2.jar
+client/jena/stardog-jena-2.2.jar
+client/sesame/stardog-sesame-2.2.jar
+client/snarl/bigpacket-client-2.2.jar
+client/snarl/bigpacket-shared-2.2.jar
+client/snarl/cp-common-protobuf-1.2.jar
+client/snarl/stardog-icv-api-2.2.jar
+client/snarl/stardog-icv-shared-2.2.jar
+client/snarl/stardog-icv-snarl-client-2.2.jar
+client/snarl/stardog-icv-snarl-shared-2.2.jar
+client/snarl/stardog-reasoning-protocol-shared-2.2.jar
+client/snarl/stardog-reasoning-snarl-client-2.2.jar
+client/snarl/stardog-reasoning-snarl-shared-2.2.jar
+client/snarl/stardog-search-snarl-client-2.2.jar
+client/snarl/stardog-snarl-client-2.2.jar
+client/snarl/stardog-snarl-shared-2.2.jar
+client/snarl/stardog-watchdog-protocol-shared-2.2.jar
+client/snarl/stardog-watchdog-snarl-client-2.2.jar
+client/snarl/stardog-watchdog-snarl-shared-2.2.jar
+server/dbms/aopalliance-1.0.jar
+server/dbms/commons-beanutils-1.8.3.jar
+server/dbms/commons-codec-1.7.jar
+server/dbms/commons-compress-1.6.jar
+server/dbms/commons-io-2.4.jar
+server/dbms/commons-lang-2.6.jar
+server/dbms/commons-math-1.2.jar
+server/dbms/commons-pool-1.6.jar
+server/dbms/cp-common-license-1.0.5.jar
+server/dbms/cp-common-openrdf-2.0.4.jar
+server/dbms/cp-common-protobuf-1.2.jar
+server/dbms/cp-common-utils-3.1.1.jar
+server/dbms/data-exporter-1.0.0.jar
+server/dbms/erg-1.5.2.jar
+server/dbms/guava-17.0.jar
+server/dbms/guice-3.0.jar
+server/dbms/guice-assistedinject-3.0.jar
+server/dbms/guice-multibindings-3.0.jar
+server/dbms/guice-throwingproviders-3.0.jar
+server/dbms/hppc-0.5.2.jar
+server/dbms/jackson-annotations-2.1.4.jar
+server/dbms/jackson-core-2.2.1.jar
+server/dbms/jackson-databind-2.1.4.jar
+server/dbms/javax.inject-1.jar
+server/dbms/jbcrypt-0.3.1.jar
+server/dbms/jsonld-java-1.0.1-SNAPSHOT.jar
+server/dbms/jsonld-java-sesame-1.0.1-SNAPSHOT.jar
+server/dbms/lucene-analyzers-common-4.7.0.jar
+server/dbms/lucene-core-4.7.2.jar
+server/dbms/lucene-misc-4.7.0.jar
+server/dbms/lucene-queries-4.7.0.jar
+server/dbms/lucene-queryparser-4.7.0.jar
+server/dbms/lucene-sandbox-4.7.0.jar
+server/dbms/lucene-suggest-4.7.0.jar
+server/dbms/netty-all-4.0.20.Final.jar
+server/dbms/opencsv-2.0.jar
+server/dbms/openrdf-sesame-2.7.12.jar
+server/dbms/protobuf-java-2.5.0.jar
+server/dbms/protocols-api-server-2.2.jar
+server/dbms/protocols-api-shared-2.2.jar
+server/dbms/quartz-2.1.3.jar
+server/dbms/shiro-core-1.2.1.jar
+server/dbms/slf4j-api-1.7.5.jar
+server/dbms/slf4j-jdk14-1.7.5.jar
+server/dbms/stardog-2.2.jar
+server/dbms/stardog-common-rdf-2.2.jar
+server/dbms/stardog-common-utils-2.2.jar
+server/dbms/stardog-icv-2.2.jar
+server/dbms/stardog-icv-api-2.2.jar
+server/dbms/stardog-icv-core-api-2.2.jar
+server/dbms/stardog-logging-2.2.jar
+server/dbms/stardog-openrdf-utils-2.2.jar
+server/dbms/stardog-prov-2.2.jar
+server/dbms/stardog-reasoning-2.2.jar
+server/dbms/stardog-reasoning-api-2.2.jar
+server/dbms/stardog-reasoning-shared-2.2.jar
+server/dbms/stardog-search-2.2.jar
+server/dbms/stardog-search-shared-2.2.jar
+server/dbms/stardog-security-2.2.jar
+server/dbms/stardog-shared-2.2.jar
+server/dbms/stardog-skos-2.2.jar
+server/dbms/stardog-snarl-api-2.2.jar
+server/dbms/stardog-watchdog-2.2.jar
+server/dbms/truelicense-core-1.33.jar
+server/dbms/truelicense-xml-1.33.jar
+server/dbms/xz-1.4.jar
+server/http/annex-0.5.8.jar
+server/http/bigpacket-client-2.2.jar
+server/http/bigpacket-server-2.2.jar
+server/http/bigpacket-shared-2.2.jar
+server/http/blackout-1.1.7.jar
+server/http/commons-digester-1.8.jar
+server/http/commons-logging-1.1.1.jar
+server/http/commons-validator-1.4.0.jar
+server/http/gson-2.2.1.jar
+server/http/httpclient-4.2.2.jar
+server/http/httpcore-4.2.2.jar
+server/http/httpmime-4.2.2.jar
+server/http/jbcrypt-0.3.1.jar
+server/http/jettison-1.3.4.jar
+server/http/json-20090211.jar
+server/http/json-simple-1.1.1.jar
+server/http/pellet-3.0.2.jar
+server/http/stardog-http-annex-2.2.jar
+server/http/stardog-http-client-2.2.jar
+server/http/stardog-http-server-2.2.jar
+server/http/stardog-http-shared-2.2.jar
+server/http/stardog-icv-http-server-2.2.jar
+server/http/stardog-icv-shared-2.2.jar
+server/http/stardog-protocols-spec-client-2.2.jar
+server/http/stardog-protocols-spec-server-2.2.jar
+server/http/stardog-protocols-spec-shared-2.2.jar
+server/http/stardog-reasoning-http-server-2.2.jar
+server/http/stardog-reasoning-protocol-shared-2.2.jar
+server/http/stardog-reasoning-shared-2.2.jar
+server/http/stardog-security-2.2.jar
+server/http/stardog-sesame-2.2.jar
+server/http/stardog-snarl-client-2.2.jar
+server/http/stardog-snarl-server-2.2.jar
+server/http/stardog-snarl-shared-2.2.jar
+server/http/stardog-watchdog-http-server-2.2.jar
+server/http/stardog-watchdog-protocol-shared-2.2.jar
+server/http/stax-api-1.0.1.jar
+server/http/xml-security-impl-1.0.jar
+server/snarl/bigpacket-server-2.2.jar
+server/snarl/bigpacket-shared-2.2.jar
+server/snarl/pellet-3.0.2.jar
+server/snarl/stardog-icv-api-2.2.jar
+server/snarl/stardog-icv-core-api-2.2.jar
+server/snarl/stardog-icv-shared-2.2.jar
+server/snarl/stardog-icv-snarl-server-2.2.jar
+server/snarl/stardog-icv-snarl-shared-2.2.jar
+server/snarl/stardog-protocols-spec-client-2.2.jar
+server/snarl/stardog-protocols-spec-server-2.2.jar
+server/snarl/stardog-protocols-spec-shared-2.2.jar
+server/snarl/stardog-prov-2.2.jar
+server/snarl/stardog-reasoning-api-2.2.jar
+server/snarl/stardog-reasoning-protocol-shared-2.2.jar
+server/snarl/stardog-reasoning-shared-2.2.jar
+server/snarl/stardog-reasoning-snarl-server-2.2.jar
+server/snarl/stardog-reasoning-snarl-shared-2.2.jar
+server/snarl/stardog-snarl-server-2.2.jar
+server/snarl/stardog-snarl-shared-2.2.jar
+server/snarl/stardog-versioning-2.2.jar
+server/snarl/stardog-versioning-api-2.2.jar
+server/snarl/stardog-versioning-protocols-shared-2.2.jar
+server/snarl/stardog-versioning-protocols-shared-snarl-2.2.jar
+server/snarl/stardog-versioning-shared-2.2.jar
+server/snarl/stardog-versioning-snarl-server-2.2.jar
+server/snarl/stardog-versioning-spec-client-2.2.jar
+server/snarl/stardog-versioning-spec-server-2.2.jar
+server/snarl/stardog-watchdog-protocol-shared-2.2.jar
+server/snarl/stardog-watchdog-snarl-server-2.2.jar
+server/snarl/stardog-watchdog-snarl-shared-2.2.jar
+!
+
+rm -rf $TMPDIRECTORY

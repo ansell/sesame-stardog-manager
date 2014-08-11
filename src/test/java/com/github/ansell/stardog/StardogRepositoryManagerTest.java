@@ -5,13 +5,27 @@ package com.github.ansell.stardog;
 
 import static org.junit.Assert.*;
 
+import java.net.MalformedURLException;
+import java.net.SocketAddress;
+import java.net.URL;
+import java.util.Set;
+
+import io.netty.channel.local.LocalAddress;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.openrdf.repository.Repository;
+import org.openrdf.rio.RDFFormat;
+import org.openrdf.rio.RDFWriterFactory;
+import org.openrdf.rio.RDFWriterRegistry;
 
-import com.complexible.common.protocols.server.Server;
+// import com.complexible.common.protocols.server.Server;
 import com.complexible.stardog.Stardog;
+import com.complexible.stardog.api.ConnectionConfiguration;
+import com.complexible.stardog.api.ConnectionPoolConfig;
+import com.complexible.stardog.api.admin.AdminConnectionConfiguration;
 import com.complexible.stardog.protocols.snarl.SNARLProtocolConstants;
 
 /**
@@ -21,15 +35,26 @@ import com.complexible.stardog.protocols.snarl.SNARLProtocolConstants;
 public class StardogRepositoryManagerTest
 {
     
-    private Server aServer;
-
+    // private Server aServer;
+    
     /**
      * @throws java.lang.Exception
      */
     @Before
     public void setUp() throws Exception
     {
-        aServer = Stardog.buildServer().bind(SNARLProtocolConstants.EMBEDDED_ADDRESS).start();
+        RDFWriterRegistry instance = RDFWriterRegistry.getInstance();
+        
+        Set<RDFFormat> keys = instance.getKeys();
+        
+        System.out.println(keys);
+        
+        for(RDFWriterFactory format : instance.getAll())
+        {
+            System.out.println(format.getClass().getName());
+        }
+        
+        // aServer = Stardog.buildServer().bind(SNARLProtocolConstants.EMBEDDED_ADDRESS).start();
     }
     
     /**
@@ -38,21 +63,35 @@ public class StardogRepositoryManagerTest
     @After
     public void tearDown() throws Exception
     {
-        aServer.stop();
+        // aServer.stop();
     }
     
     /**
-     * Test method for {@link com.github.ansell.stardog.StardogRepositoryManager#createSystemRepository()}.
+     * Test method for
+     * {@link com.github.ansell.stardog.StardogRepositoryManager#createSystemRepository()}.
+     * 
+     * @throws Exception
      */
-    @Ignore("TODO: Implement me")
     @Test
-    public void testCreateSystemRepository()
+    public void testCreateSystemRepository() throws Exception
     {
-        fail("Not yet implemented");
+        URL serverUrl = new URL("snarl://localhost/test-db");
+        
+        ConnectionConfiguration connConn = ConnectionConfiguration.to("test-db").server("localhost");
+        
+        AdminConnectionConfiguration adminConn = AdminConnectionConfiguration.toEmbeddedServer();
+        
+        StardogRepositoryManager test = new StardogRepositoryManager(adminConn, connConn, serverUrl);
+        
+        Repository systemRepository = test.getSystemRepository();
+        
+        assertNotNull(systemRepository);
     }
     
     /**
-     * Test method for {@link com.github.ansell.stardog.StardogRepositoryManager#createRepository(java.lang.String)}.
+     * Test method for
+     * {@link com.github.ansell.stardog.StardogRepositoryManager#createRepository(java.lang.String)}
+     * .
      */
     @Ignore("TODO: Implement me")
     @Test
@@ -62,7 +101,9 @@ public class StardogRepositoryManagerTest
     }
     
     /**
-     * Test method for {@link com.github.ansell.stardog.StardogRepositoryManager#getRepositoryInfo(java.lang.String)}.
+     * Test method for
+     * {@link com.github.ansell.stardog.StardogRepositoryManager#getRepositoryInfo(java.lang.String)}
+     * .
      */
     @Ignore("TODO: Implement me")
     @Test
@@ -72,7 +113,8 @@ public class StardogRepositoryManagerTest
     }
     
     /**
-     * Test method for {@link com.github.ansell.stardog.StardogRepositoryManager#getAllRepositoryInfos(boolean)}.
+     * Test method for
+     * {@link com.github.ansell.stardog.StardogRepositoryManager#getAllRepositoryInfos(boolean)}.
      */
     @Ignore("TODO: Implement me")
     @Test
@@ -82,7 +124,9 @@ public class StardogRepositoryManagerTest
     }
     
     /**
-     * Test method for {@link com.github.ansell.stardog.StardogRepositoryManager#cleanUpRepository(java.lang.String)}.
+     * Test method for
+     * {@link com.github.ansell.stardog.StardogRepositoryManager#cleanUpRepository(java.lang.String)}
+     * .
      */
     @Ignore("TODO: Implement me")
     @Test
@@ -102,7 +146,9 @@ public class StardogRepositoryManagerTest
     }
     
     /**
-     * Test method for {@link com.github.ansell.stardog.StardogRepositoryManager#StardogRepositoryManager(com.complexible.stardog.api.admin.AdminConnectionConfiguration, com.complexible.stardog.api.ConnectionConfiguration, java.net.URL)}.
+     * Test method for
+     * {@link com.github.ansell.stardog.StardogRepositoryManager#StardogRepositoryManager(com.complexible.stardog.api.admin.AdminConnectionConfiguration, com.complexible.stardog.api.ConnectionConfiguration, java.net.URL)}
+     * .
      */
     @Ignore("TODO: Implement me")
     @Test
@@ -122,7 +168,8 @@ public class StardogRepositoryManagerTest
     }
     
     /**
-     * Test method for {@link org.openrdf.repository.manager.RepositoryManager#RepositoryManager(java.util.Map)}.
+     * Test method for
+     * {@link org.openrdf.repository.manager.RepositoryManager#RepositoryManager(java.util.Map)}.
      */
     @Ignore("TODO: Implement me")
     @Test
@@ -152,7 +199,8 @@ public class StardogRepositoryManagerTest
     }
     
     /**
-     * Test method for {@link org.openrdf.repository.manager.RepositoryManager#getSystemRepository()}.
+     * Test method for
+     * {@link org.openrdf.repository.manager.RepositoryManager#getSystemRepository()}.
      */
     @Ignore("TODO: Implement me")
     @Test
@@ -162,7 +210,9 @@ public class StardogRepositoryManagerTest
     }
     
     /**
-     * Test method for {@link org.openrdf.repository.manager.RepositoryManager#getNewRepositoryID(java.lang.String)}.
+     * Test method for
+     * {@link org.openrdf.repository.manager.RepositoryManager#getNewRepositoryID(java.lang.String)}
+     * .
      */
     @Ignore("TODO: Implement me")
     @Test
@@ -182,7 +232,9 @@ public class StardogRepositoryManagerTest
     }
     
     /**
-     * Test method for {@link org.openrdf.repository.manager.RepositoryManager#hasRepositoryConfig(java.lang.String)}.
+     * Test method for
+     * {@link org.openrdf.repository.manager.RepositoryManager#hasRepositoryConfig(java.lang.String)}
+     * .
      */
     @Ignore("TODO: Implement me")
     @Test
@@ -192,7 +244,9 @@ public class StardogRepositoryManagerTest
     }
     
     /**
-     * Test method for {@link org.openrdf.repository.manager.RepositoryManager#getRepositoryConfig(java.lang.String)}.
+     * Test method for
+     * {@link org.openrdf.repository.manager.RepositoryManager#getRepositoryConfig(java.lang.String)}
+     * .
      */
     @Ignore("TODO: Implement me")
     @Test
@@ -202,7 +256,9 @@ public class StardogRepositoryManagerTest
     }
     
     /**
-     * Test method for {@link org.openrdf.repository.manager.RepositoryManager#addRepositoryConfig(org.openrdf.repository.config.RepositoryConfig)}.
+     * Test method for
+     * {@link org.openrdf.repository.manager.RepositoryManager#addRepositoryConfig(org.openrdf.repository.config.RepositoryConfig)}
+     * .
      */
     @Ignore("TODO: Implement me")
     @Test
@@ -212,7 +268,9 @@ public class StardogRepositoryManagerTest
     }
     
     /**
-     * Test method for {@link org.openrdf.repository.manager.RepositoryManager#removeRepositoryConfig(java.lang.String)}.
+     * Test method for
+     * {@link org.openrdf.repository.manager.RepositoryManager#removeRepositoryConfig(java.lang.String)}
+     * .
      */
     @Ignore("TODO: Implement me")
     @Test
@@ -222,7 +280,8 @@ public class StardogRepositoryManagerTest
     }
     
     /**
-     * Test method for {@link org.openrdf.repository.manager.RepositoryManager#isSafeToRemove(java.lang.String)}.
+     * Test method for
+     * {@link org.openrdf.repository.manager.RepositoryManager#isSafeToRemove(java.lang.String)}.
      */
     @Ignore("TODO: Implement me")
     @Test
@@ -232,7 +291,8 @@ public class StardogRepositoryManagerTest
     }
     
     /**
-     * Test method for {@link org.openrdf.repository.manager.RepositoryManager#removeRepository(java.lang.String)}.
+     * Test method for
+     * {@link org.openrdf.repository.manager.RepositoryManager#removeRepository(java.lang.String)}.
      */
     @Ignore("TODO: Implement me")
     @Test
@@ -242,7 +302,8 @@ public class StardogRepositoryManagerTest
     }
     
     /**
-     * Test method for {@link org.openrdf.repository.manager.RepositoryManager#getRepository(java.lang.String)}.
+     * Test method for
+     * {@link org.openrdf.repository.manager.RepositoryManager#getRepository(java.lang.String)}.
      */
     @Ignore("TODO: Implement me")
     @Test
@@ -252,7 +313,8 @@ public class StardogRepositoryManagerTest
     }
     
     /**
-     * Test method for {@link org.openrdf.repository.manager.RepositoryManager#getInitializedRepositoryIDs()}.
+     * Test method for
+     * {@link org.openrdf.repository.manager.RepositoryManager#getInitializedRepositoryIDs()}.
      */
     @Ignore("TODO: Implement me")
     @Test
@@ -262,7 +324,8 @@ public class StardogRepositoryManagerTest
     }
     
     /**
-     * Test method for {@link org.openrdf.repository.manager.RepositoryManager#getInitializedRepositories()}.
+     * Test method for
+     * {@link org.openrdf.repository.manager.RepositoryManager#getInitializedRepositories()}.
      */
     @Ignore("TODO: Implement me")
     @Test
@@ -272,7 +335,9 @@ public class StardogRepositoryManagerTest
     }
     
     /**
-     * Test method for {@link org.openrdf.repository.manager.RepositoryManager#getInitializedRepository(java.lang.String)}.
+     * Test method for
+     * {@link org.openrdf.repository.manager.RepositoryManager#getInitializedRepository(java.lang.String)}
+     * .
      */
     @Ignore("TODO: Implement me")
     @Test
@@ -282,7 +347,9 @@ public class StardogRepositoryManagerTest
     }
     
     /**
-     * Test method for {@link org.openrdf.repository.manager.RepositoryManager#removeInitializedRepository(java.lang.String)}.
+     * Test method for
+     * {@link org.openrdf.repository.manager.RepositoryManager#removeInitializedRepository(java.lang.String)}
+     * .
      */
     @Ignore("TODO: Implement me")
     @Test
@@ -292,7 +359,9 @@ public class StardogRepositoryManagerTest
     }
     
     /**
-     * Test method for {@link org.openrdf.repository.manager.RepositoryManager#setInitializedRepositories(java.util.Map)}.
+     * Test method for
+     * {@link org.openrdf.repository.manager.RepositoryManager#setInitializedRepositories(java.util.Map)}
+     * .
      */
     @Ignore("TODO: Implement me")
     @Test
@@ -302,7 +371,8 @@ public class StardogRepositoryManagerTest
     }
     
     /**
-     * Test method for {@link org.openrdf.repository.manager.RepositoryManager#updateInitializedRepositories()}.
+     * Test method for
+     * {@link org.openrdf.repository.manager.RepositoryManager#updateInitializedRepositories()}.
      */
     @Ignore("TODO: Implement me")
     @Test
@@ -312,7 +382,8 @@ public class StardogRepositoryManagerTest
     }
     
     /**
-     * Test method for {@link org.openrdf.repository.manager.RepositoryManager#getAllRepositories()}.
+     * Test method for {@link org.openrdf.repository.manager.RepositoryManager#getAllRepositories()}
+     * .
      */
     @Ignore("TODO: Implement me")
     @Test
@@ -322,7 +393,8 @@ public class StardogRepositoryManagerTest
     }
     
     /**
-     * Test method for {@link org.openrdf.repository.manager.RepositoryManager#getAllRepositoryInfos()}.
+     * Test method for
+     * {@link org.openrdf.repository.manager.RepositoryManager#getAllRepositoryInfos()}.
      */
     @Ignore("TODO: Implement me")
     @Test
@@ -332,7 +404,8 @@ public class StardogRepositoryManagerTest
     }
     
     /**
-     * Test method for {@link org.openrdf.repository.manager.RepositoryManager#getAllUserRepositoryInfos()}.
+     * Test method for
+     * {@link org.openrdf.repository.manager.RepositoryManager#getAllUserRepositoryInfos()}.
      */
     @Ignore("TODO: Implement me")
     @Test
@@ -362,7 +435,9 @@ public class StardogRepositoryManagerTest
     }
     
     /**
-     * Test method for {@link org.openrdf.repository.manager.RepositoryManager#refreshRepository(org.openrdf.repository.RepositoryConnection, java.lang.String, org.openrdf.repository.Repository)}.
+     * Test method for
+     * {@link org.openrdf.repository.manager.RepositoryManager#refreshRepository(org.openrdf.repository.RepositoryConnection, java.lang.String, org.openrdf.repository.Repository)}
+     * .
      */
     @Ignore("TODO: Implement me")
     @Test
@@ -372,7 +447,9 @@ public class StardogRepositoryManagerTest
     }
     
     /**
-     * Test method for {@link org.openrdf.repository.manager.RepositoryManager#cleanupIfRemoved(org.openrdf.repository.RepositoryConnection, java.lang.String)}.
+     * Test method for
+     * {@link org.openrdf.repository.manager.RepositoryManager#cleanupIfRemoved(org.openrdf.repository.RepositoryConnection, java.lang.String)}
+     * .
      */
     @Ignore("TODO: Implement me")
     @Test

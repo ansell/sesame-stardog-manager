@@ -52,36 +52,12 @@
 					<groupId>org.openrdf.sesame</groupId>
 				</exclusion>
 				<exclusion>
-					<artifactId>jsonld-java</artifactId>
-					<groupId>dfki.km.json</groupId>
-				</exclusion>
-				<exclusion>
 					<artifactId>license</artifactId>
 					<groupId>com.clarkparsia</groupId>
 				</exclusion>
 				<exclusion>
 					<artifactId>erg</artifactId>
 					<groupId>com.complexible.erg</groupId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>com.complexible.stardog.protocols.snarl</groupId>
-			<artifactId>server</artifactId>
-			<version>2.2</version>
-			<exclusions>
-				<exclusion>
-					<!-- Depends on this as if it were a jar artifact, when it is a pom -->
-					<artifactId>sesame</artifactId>
-					<groupId>org.openrdf.sesame</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>jsonld-java</artifactId>
-					<groupId>dfki.km.json</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>dbms</artifactId>
-					<groupId>com.complexible.stardog</groupId>
 				</exclusion>
 			</exclusions>
 		</dependency>
@@ -95,10 +71,6 @@
 					<artifactId>sesame</artifactId>
 					<groupId>org.openrdf.sesame</groupId>
 				</exclusion>
-				<exclusion>
-					<artifactId>jsonld-java</artifactId>
-					<groupId>dfki.km.json</groupId>
-				</exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>
@@ -110,10 +82,6 @@
 					<!-- Depends on this as if it were a jar artifact, when it is a pom -->
 					<artifactId>sesame</artifactId>
 					<groupId>org.openrdf.sesame</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>jsonld-java</artifactId>
-					<groupId>dfki.km.json</groupId>
 				</exclusion>
 			</exclusions>
 		</dependency>
