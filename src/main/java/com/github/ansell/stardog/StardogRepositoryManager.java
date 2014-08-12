@@ -19,6 +19,7 @@ import org.openrdf.repository.manager.SystemRepository;
 
 import com.complexible.stardog.StardogException;
 import com.complexible.stardog.api.ConnectionConfiguration;
+import com.complexible.stardog.api.admin.AdminConnection;
 import com.complexible.stardog.api.admin.AdminConnectionConfiguration;
 import com.complexible.stardog.sesame.StardogRepository;
 
@@ -45,9 +46,27 @@ public class StardogRepositoryManager extends RepositoryManager
     @Override
     protected Repository createSystemRepository() throws RepositoryException
     {
+        RepositoryInfo repositoryInfo = getRepositoryInfo("SYSTEM");
+        if(repositoryInfo == null)
+        {
+            try
+            {
+                AdminConnection connect = adminConn.connect();
+                
+                connect.disk("SYSTEM").create();
+                
+                connect.close();
+            }
+            catch(StardogException e)
+            {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
         Repository aRepo = new StardogRepository(connConn.copy().database("SYSTEM"));
         aRepo.initialize();
         return aRepo;
+        
     }
     
     @Override

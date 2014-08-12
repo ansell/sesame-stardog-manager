@@ -21,7 +21,6 @@ import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFWriterFactory;
 import org.openrdf.rio.RDFWriterRegistry;
 
-
 // import com.complexible.common.protocols.server.Server;
 import com.complexible.stardog.Stardog;
 import com.complexible.stardog.api.ConnectionConfiguration;
@@ -39,15 +38,30 @@ public class StardogRepositoryManagerTest
     
     // private Server aServer;
     
+    private AdminConnectionConfiguration aAdminConnection;
+    private ConnectionConfiguration connConn;
+    private StardogRepositoryManager testRepositoryManager;
+    
     /**
      * @throws java.lang.Exception
      */
     @Before
     public void setUp() throws Exception
     {
-        String aServerUrl = "http://ppodd1-cbr.it.csiro.au:5820";
+        String aServerUrl = "snarl://ppodd1-cbr.it.csiro.au:5820";
         
-        AdminConnection aAdminConnection = AdminConnectionConfiguration.toServer(aServerUrl).credentials("admin", "testAdminPassword").connect();
+        aAdminConnection = AdminConnectionConfiguration.toServer(aServerUrl).credentials("admin", "testAdminPassword");
+        
+        // Warning, make sure this is not a production server instance before running these tests
+        // Will change this to default to not happen once some initial tests are working
+        AdminConnection connect = aAdminConnection.connect();
+        
+        for(String nextRepo : connect.list())
+        {
+            connect.drop(nextRepo);
+        }
+        
+        connConn = ConnectionConfiguration.to(aServerUrl);
         
         RDFWriterRegistry instance = RDFWriterRegistry.getInstance();
         
@@ -60,6 +74,13 @@ public class StardogRepositoryManagerTest
             System.out.println(format.getClass().getName());
         }
         
+        testRepositoryManager = new StardogRepositoryManager(aAdminConnection, connConn, null);
+        testRepositoryManager.initialize();
+        
+        // FIXME: Once Maven is working with the server modules enable this to avoid connecting to a
+        // permanent store
+        // Currently this method only works using Ant which is able to arbitrarily suck up all of
+        // the jar files into the classpath without having to know their provenance
         // aServer = Stardog.buildServer().bind(SNARLProtocolConstants.EMBEDDED_ADDRESS).start();
     }
     
@@ -81,15 +102,7 @@ public class StardogRepositoryManagerTest
     @Test
     public void testCreateSystemRepository() throws Exception
     {
-        URL serverUrl = new URL("http://ppodd1-cbr.it.csiro.au:5820/test-db");
-        
-        ConnectionConfiguration connConn = ConnectionConfiguration.to("test-db").server("ppodd1-cbr.it.csiro.au");
-        
-        AdminConnectionConfiguration adminConn = AdminConnectionConfiguration.toEmbeddedServer();
-        
-        StardogRepositoryManager test = new StardogRepositoryManager(adminConn, connConn, serverUrl);
-        
-        Repository systemRepository = test.getSystemRepository();
+        Repository systemRepository = testRepositoryManager.getSystemRepository();
         
         assertNotNull(systemRepository);
     }
