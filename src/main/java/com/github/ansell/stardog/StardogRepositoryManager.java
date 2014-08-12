@@ -32,15 +32,12 @@ public class StardogRepositoryManager extends RepositoryManager
 {
     private AdminConnectionConfiguration adminConn;
     private ConnectionConfiguration connConn;
-    private URL serverUrl;
     
-    public StardogRepositoryManager(AdminConnectionConfiguration adminConn, ConnectionConfiguration connConn,
-            URL serverUrl)
+    public StardogRepositoryManager(AdminConnectionConfiguration adminConn, ConnectionConfiguration connConn)
     {
         super(new ConcurrentHashMap<String, Repository>());
         this.adminConn = adminConn;
         this.connConn = connConn;
-        this.serverUrl = serverUrl;
     }
     
     @Override
@@ -164,7 +161,7 @@ public class StardogRepositoryManager extends RepositoryManager
     @Override
     public URL getLocation() throws MalformedURLException
     {
-        return serverUrl;
+        return null;
     }
     
 }

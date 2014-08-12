@@ -74,7 +74,7 @@ public class StardogRepositoryManagerTest
             System.out.println(format.getClass().getName());
         }
         
-        testRepositoryManager = new StardogRepositoryManager(aAdminConnection, connConn, null);
+        testRepositoryManager = new StardogRepositoryManager(aAdminConnection, connConn);
         testRepositoryManager.initialize();
         
         // FIXME: Once Maven is working with the server modules enable this to avoid connecting to a
