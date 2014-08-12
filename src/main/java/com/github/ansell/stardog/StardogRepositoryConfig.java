@@ -144,6 +144,7 @@ public class StardogRepositoryConfig extends RepositoryImplConfigBase
     public void validate() throws RepositoryConfigException
     {
         super.validate();
+        // TODO: Validate particular properties that have known ranges
     }
     
     @Override
