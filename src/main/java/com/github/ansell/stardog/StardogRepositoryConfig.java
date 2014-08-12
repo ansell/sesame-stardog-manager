@@ -96,36 +96,39 @@ public class StardogRepositoryConfig extends RepositoryImplConfigBase
     
     static
     {
-        NAMESPACE_PREFIX_URI = ValueFactoryImpl.getInstance().createURI("http://purl.org/sesame-namespaces#", "prefix");
-        NAMESPACE_NAME_URI = ValueFactoryImpl.getInstance().createURI("http://purl.org/sesame-namespaces#", "name");
+        ValueFactoryImpl vf = ValueFactoryImpl.getInstance();
+        NAMESPACE_PREFIX_URI = vf.createURI("http://purl.org/sesame-namespaces#", "prefix");
+        NAMESPACE_NAME_URI = vf.createURI("http://purl.org/sesame-namespaces#", "name");
         
-        MULTI_STRING_PROPS.put(DatabaseOptions.ARCHETYPES, null);
-        BOOLEAN_PROPS.put(DatabaseOptions.CONSISTENCY_AUTOMATIC, null);
-        MULTI_URI_PROPS.put(DatabaseOptions.ICV_ACTIVE_GRAPHS, null);
-        BOOLEAN_PROPS.put(DatabaseOptions.ICV_CONSISTENCY_AUTOMATIC, null);
-        BOOLEAN_PROPS.put(DatabaseOptions.ICV_ENABLED, null);
-        REASONING_TYPE_PROPS.put(DatabaseOptions.ICV_REASONING_TYPE, null);
-        STRING_PROPS.put(DatabaseOptions.NAME, null);
-        MULTI_NAMESPACE_PROPS.put(DatabaseOptions.NAMESPACES, null);
-        BOOLEAN_PROPS.put(DatabaseOptions.PRESERVE_BNODE_IDS, null);
-        BOOLEAN_PROPS.put(DatabaseOptions.PUNNING_ENABLED, null);
-        DURATION_PROPS.put(DatabaseOptions.QUERY_TIMEOUT, null);
-        MULTI_URI_PROPS.put(DatabaseOptions.SCHEMA_GRAPHS, null);
-        BOOLEAN_PROPS.put(DatabaseOptions.SEARCHABLE, null);
-        BOOLEAN_PROPS.put(DatabaseOptions.STRICT_PARSING, null);
-        BOOLEAN_PROPS.put(DatabaseOptions.TRANSACTIONS_DURABLE, null);
+        String prefix = "http://purl.org/sesame-stardog#";
         
-        BOOLEAN_PROPS.put(IndexOptions.AUTO_STATS_UPDATE, null);
-        BOOLEAN_PROPS.put(IndexOptions.CANONICAL_LITERALS, null);
+        MULTI_STRING_PROPS.put(DatabaseOptions.ARCHETYPES, vf.createURI(prefix, "archetype"));
+        BOOLEAN_PROPS.put(DatabaseOptions.CONSISTENCY_AUTOMATIC, vf.createURI(prefix, "consistencyAutomatic"));
+        MULTI_URI_PROPS.put(DatabaseOptions.ICV_ACTIVE_GRAPHS, vf.createURI(prefix, "icvActiveGraph"));
+        BOOLEAN_PROPS.put(DatabaseOptions.ICV_CONSISTENCY_AUTOMATIC, vf.createURI(prefix, "icvConsistencyAutomatic"));
+        BOOLEAN_PROPS.put(DatabaseOptions.ICV_ENABLED, vf.createURI(prefix, "icvEnabled"));
+        REASONING_TYPE_PROPS.put(DatabaseOptions.ICV_REASONING_TYPE, vf.createURI(prefix, "icvReasoningType"));
+        STRING_PROPS.put(DatabaseOptions.NAME, vf.createURI(prefix, "name"));
+        MULTI_NAMESPACE_PROPS.put(DatabaseOptions.NAMESPACES, vf.createURI(prefix, "namespace"));
+        BOOLEAN_PROPS.put(DatabaseOptions.PRESERVE_BNODE_IDS, vf.createURI(prefix, "preserveBNodeIDs"));
+        BOOLEAN_PROPS.put(DatabaseOptions.PUNNING_ENABLED, vf.createURI(prefix, "punningEnabled"));
+        DURATION_PROPS.put(DatabaseOptions.QUERY_TIMEOUT, vf.createURI(prefix, "queryTimeout"));
+        MULTI_URI_PROPS.put(DatabaseOptions.SCHEMA_GRAPHS, vf.createURI(prefix, "schemaGraph"));
+        BOOLEAN_PROPS.put(DatabaseOptions.SEARCHABLE, vf.createURI(prefix, "searchable"));
+        BOOLEAN_PROPS.put(DatabaseOptions.STRICT_PARSING, vf.createURI(prefix, "stringParsing"));
+        BOOLEAN_PROPS.put(DatabaseOptions.TRANSACTIONS_DURABLE, vf.createURI(prefix, "transactionsDurable"));
+        
+        BOOLEAN_PROPS.put(IndexOptions.AUTO_STATS_UPDATE, vf.createURI(prefix, "autoStatsUpdate"));
+        BOOLEAN_PROPS.put(IndexOptions.CANONICAL_LITERALS, vf.createURI(prefix, "canonicalLiterals"));
         // IndexOptions.DIFF_INDEX_MAX_LIMIT;
         // IndexOptions.DIFF_INDEX_MIN_LIMIT;
         // IndexOptions.DIFF_INDEX_SIZE;
         // IndexOptions.HOME;
         // IndexOptions.INDEX_CONNECTION_TIMEOUT_MS;
-        BOOLEAN_PROPS.put(IndexOptions.INDEX_NAMED_GRAPHS, null);
+        BOOLEAN_PROPS.put(IndexOptions.INDEX_NAMED_GRAPHS, vf.createURI(prefix, "indexNamedGraphs"));
         // IndexOptions.INDEX_TYPE;
-        BOOLEAN_PROPS.put(IndexOptions.PERSIST, null);
-        BOOLEAN_PROPS.put(IndexOptions.SYNC, null);
+        BOOLEAN_PROPS.put(IndexOptions.PERSIST, vf.createURI(prefix, "indexPersist"));
+        BOOLEAN_PROPS.put(IndexOptions.SYNC, vf.createURI(prefix, "indexSync"));
     }
     
     private final ConcurrentMap<ConfigProperty<Boolean>, Boolean> booleanProps = new ConcurrentHashMap<>();
