@@ -56,8 +56,7 @@ public class StardogRepositoryManager extends RepositoryManager
             }
             catch(StardogException e)
             {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                throw new RepositoryException(e);
             }
         }
         Repository aRepo = new StardogRepository(connConn.copy().database("SYSTEM"));
