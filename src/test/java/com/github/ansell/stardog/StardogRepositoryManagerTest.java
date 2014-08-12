@@ -286,55 +286,48 @@ public class StardogRepositoryManagerTest
     }
     
     /**
-     * Test method for {@link org.openrdf.repository.manager.RepositoryManager#RepositoryManager()}.
-     */
-    @Ignore("TODO: Implement me")
-    @Test
-    public void testRepositoryManager()
-    {
-        fail("Not yet implemented");
-    }
-    
-    /**
-     * Test method for
-     * {@link org.openrdf.repository.manager.RepositoryManager#RepositoryManager(java.util.Map)}.
-     */
-    @Ignore("TODO: Implement me")
-    @Test
-    public void testRepositoryManagerMapOfStringRepository()
-    {
-        fail("Not yet implemented");
-    }
-    
-    /**
      * Test method for {@link org.openrdf.repository.manager.RepositoryManager#isInitialized()}.
+     * 
+     * @throws Exception
      */
-    @Ignore("TODO: Implement me")
     @Test
-    public void testIsInitialized()
+    public void testIsInitialized() throws Exception
     {
-        fail("Not yet implemented");
-    }
-    
-    /**
-     * Test method for {@link org.openrdf.repository.manager.RepositoryManager#initialize()}.
-     */
-    @Ignore("TODO: Implement me")
-    @Test
-    public void testInitialize()
-    {
-        fail("Not yet implemented");
+        assertTrue(testRepositoryManager.isInitialized());
+        
+        testRepositoryManager = new StardogRepositoryManager(aServerUrl, "admin", "testAdminPassword");
+        assertFalse(testRepositoryManager.isInitialized());
+        
+        testRepositoryManager.initialize();
+        assertTrue(testRepositoryManager.isInitialized());
     }
     
     /**
      * Test method for
      * {@link org.openrdf.repository.manager.RepositoryManager#getSystemRepository()}.
+     * 
+     * @throws Exception
      */
-    @Ignore("TODO: Implement me")
     @Test
-    public void testGetSystemRepository()
+    public void testGetSystemRepository() throws Exception
     {
-        fail("Not yet implemented");
+        Repository systemRepository = testRepositoryManager.getSystemRepository();
+        
+        assertTrue(systemRepository.isInitialized());
+        
+        RepositoryConnection connection = systemRepository.getConnection();
+        
+        try
+        {
+            connection.begin();
+            assertNotNull(connection.getNamespaces());
+            assertFalse(connection.hasStatement(null, null, null, false));
+            connection.rollback();
+        }
+        finally
+        {
+            connection.close();
+        }
     }
     
     /**
