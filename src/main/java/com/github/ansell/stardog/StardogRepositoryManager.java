@@ -13,6 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.config.RepositoryConfigException;
+import org.openrdf.repository.config.RepositoryConfigUtil;
 import org.openrdf.repository.manager.RepositoryInfo;
 import org.openrdf.repository.manager.RepositoryManager;
 import org.openrdf.repository.manager.SystemRepository;
@@ -217,7 +218,14 @@ public class StardogRepositoryManager extends RepositoryManager
         try
         {
             connect = getAdminConn().connect();
-            connect.drop(repositoryID);
+            
+            for(String nextRepo : connect.list())
+            {
+                if(nextRepo.equals(repositoryID))
+                {
+                    connect.drop(repositoryID);
+                }
+            }
         }
         catch(StardogException e)
         {
@@ -245,4 +253,35 @@ public class StardogRepositoryManager extends RepositoryManager
         return null;
     }
     
+    /*
+     * Overriding to remove reliance on "repositoryConfig" inside of the system repository
+     */
+    @Override
+    public boolean removeRepository(String repositoryID) throws RepositoryException, RepositoryConfigException
+    {
+        logger.debug("Removing repository {}.", repositoryID);
+        boolean isRemoved = false;
+        
+        synchronized(initializedRepositories)
+        {
+            logger.debug("Shutdown repository {} after removal of configuration.", repositoryID);
+            Repository repository = initializedRepositories.remove(repositoryID);
+            
+            if(repository != null && repository.isInitialized())
+            {
+                repository.shutDown();
+            }
+            
+            try
+            {
+                cleanUpRepository(repositoryID);
+            }
+            catch(IOException e)
+            {
+                throw new RepositoryException("Unable to clean up resources for removed repository " + repositoryID, e);
+            }
+        }
+        
+        return isRemoved;
+    }
 }
