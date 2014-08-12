@@ -114,6 +114,18 @@ public class StardogRepositoryConfig extends RepositoryImplConfigBase
         BOOLEAN_PROPS.put(DatabaseOptions.SEARCHABLE, null);
         BOOLEAN_PROPS.put(DatabaseOptions.STRICT_PARSING, null);
         BOOLEAN_PROPS.put(DatabaseOptions.TRANSACTIONS_DURABLE, null);
+        
+        BOOLEAN_PROPS.put(IndexOptions.AUTO_STATS_UPDATE, null);
+        BOOLEAN_PROPS.put(IndexOptions.CANONICAL_LITERALS, null);
+        // IndexOptions.DIFF_INDEX_MAX_LIMIT;
+        // IndexOptions.DIFF_INDEX_MIN_LIMIT;
+        // IndexOptions.DIFF_INDEX_SIZE;
+        // IndexOptions.HOME;
+        // IndexOptions.INDEX_CONNECTION_TIMEOUT_MS;
+        BOOLEAN_PROPS.put(IndexOptions.INDEX_NAMED_GRAPHS, null);
+        // IndexOptions.INDEX_TYPE;
+        BOOLEAN_PROPS.put(IndexOptions.PERSIST, null);
+        BOOLEAN_PROPS.put(IndexOptions.SYNC, null);
     }
     
     private final ConcurrentMap<ConfigProperty<Boolean>, Boolean> booleanProps = new ConcurrentHashMap<>();
