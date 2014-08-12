@@ -27,6 +27,7 @@ import org.openrdf.rio.RDFParserRegistry;
 import org.openrdf.rio.RDFWriterFactory;
 import org.openrdf.rio.RDFWriterRegistry;
 
+
 // import com.complexible.common.protocols.server.Server;
 import com.complexible.stardog.Stardog;
 import com.complexible.stardog.api.ConnectionConfiguration;
@@ -186,12 +187,16 @@ public class StardogRepositoryManagerTest
      * Test method for
      * {@link com.github.ansell.stardog.StardogRepositoryManager#cleanUpRepository(java.lang.String)}
      * .
+     * @throws Exception 
      */
-    @Ignore("TODO: Implement me")
     @Test
-    public void testCleanUpRepository()
+    public void testCleanUpRepository() throws Exception
     {
-        fail("Not yet implemented");
+        assertTrue(testRepositoryManager.removeRepository("SYSTEM"));
+        testRepositoryManager.cleanUpRepository("SYSTEM");
+
+        Collection<RepositoryInfo> allRepositoryInfosAfter = testRepositoryManager.getAllRepositoryInfos(true);
+        assertEquals(0, allRepositoryInfosAfter.size());
     }
     
     /**
