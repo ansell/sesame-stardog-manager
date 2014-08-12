@@ -17,7 +17,12 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.openrdf.query.QueryLanguage;
+import org.openrdf.query.TupleQuery;
+import org.openrdf.query.TupleQueryResult;
+import org.openrdf.query.resultio.QueryResultIO;
 import org.openrdf.repository.Repository;
+import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.config.RepositoryConfigException;
 import org.openrdf.repository.manager.RepositoryInfo;
@@ -27,7 +32,7 @@ import org.openrdf.rio.RDFParserRegistry;
 import org.openrdf.rio.RDFWriterFactory;
 import org.openrdf.rio.RDFWriterRegistry;
 
-
+import com.complexible.common.rdf.query.resultio.TextTableQueryResultWriter;
 // import com.complexible.common.protocols.server.Server;
 import com.complexible.stardog.Stardog;
 import com.complexible.stardog.api.ConnectionConfiguration;
@@ -49,6 +54,7 @@ public class StardogRepositoryManagerTest
     private AdminConnectionConfiguration aAdminConnection;
     private ConnectionConfiguration connConn;
     private StardogRepositoryManager testRepositoryManager;
+    private String aServerUrl;
     
     /**
      * @throws java.lang.Exception
@@ -56,7 +62,7 @@ public class StardogRepositoryManagerTest
     @Before
     public void setUp() throws Exception
     {
-        String aServerUrl = "snarl://ppodd1-cbr.it.csiro.au:5820";
+        aServerUrl = "snarl://ppodd1-cbr.it.csiro.au:5820";
         
         aAdminConnection = AdminConnectionConfiguration.toServer(aServerUrl).credentials("admin", "testAdminPassword");
         
@@ -69,7 +75,7 @@ public class StardogRepositoryManagerTest
             connect.drop(nextRepo);
         }
         
-        connConn = ConnectionConfiguration.to(aServerUrl);
+        connConn = ConnectionConfiguration.to(aServerUrl).credentials("admin", "testAdminPassword");
         
         RDFParserRegistry parsers = RDFParserRegistry.getInstance();
         
@@ -187,14 +193,15 @@ public class StardogRepositoryManagerTest
      * Test method for
      * {@link com.github.ansell.stardog.StardogRepositoryManager#cleanUpRepository(java.lang.String)}
      * .
-     * @throws Exception 
+     * 
+     * @throws Exception
      */
     @Test
     public void testCleanUpRepository() throws Exception
     {
         assertTrue(testRepositoryManager.removeRepository("SYSTEM"));
         testRepositoryManager.cleanUpRepository("SYSTEM");
-
+        
         Collection<RepositoryInfo> allRepositoryInfosAfter = testRepositoryManager.getAllRepositoryInfos(true);
         assertEquals(0, allRepositoryInfosAfter.size());
     }
@@ -214,11 +221,69 @@ public class StardogRepositoryManagerTest
      * {@link com.github.ansell.stardog.StardogRepositoryManager#StardogRepositoryManager(com.complexible.stardog.api.admin.AdminConnectionConfiguration, com.complexible.stardog.api.ConnectionConfiguration, java.net.URL)}
      * .
      */
-    @Ignore("TODO: Implement me")
     @Test
-    public void testStardogRepositoryManager()
+    public void testStardogRepositoryManager() throws Exception
     {
-        fail("Not yet implemented");
+        // Specify the server URL
+        // String aServerUrl = "http://localhost:5820";
+        
+        // first create a temporary database to use (if there is one already, drop it first)
+        // AdminConnection aAdminConnection =
+        // AdminConnectionConfiguration.toEmbeddedServer().credentials("admin", "admin").connect();
+        AdminConnection aAdminConnection =
+                AdminConnectionConfiguration.toServer(aServerUrl).credentials("admin", "testAdminPassword").connect();
+        if(aAdminConnection.list().contains("testSesame"))
+        {
+            aAdminConnection.drop("testSesame");
+        }
+        aAdminConnection.createMemory("testSesame");
+        aAdminConnection.close();
+        
+        // Create a Sesame Repository from a Stardog ConnectionConfiguration. The configuration will
+        // be used
+        // when creating new RepositoryConnections
+        Repository aRepo =
+                new StardogRepository(ConnectionConfiguration.to("testSesame").server(aServerUrl)
+                        .credentials("admin", "testAdminPassword"));
+        
+        // init the repo
+        aRepo.initialize();
+        
+        // now you can use it like a normal Sesame Repository
+        RepositoryConnection aRepoConn = aRepo.getConnection();
+        
+        // always best to turn off auto commit
+        aRepoConn.setAutoCommit(false);
+        
+        // add some data
+        // aRepoConn.add(new FileInputStream("data/sp2b_10k.n3"), "http://sesame.stardog.com/",
+        // RDFFormat.N3);
+        
+        // commit the data to stardog
+        aRepoConn.commit();
+        
+        // we can send queries...
+        // we currently only support SPARQL
+        TupleQuery aQuery =
+                aRepoConn
+                        .prepareTupleQuery(QueryLanguage.SPARQL,
+                                "select * where { ?s ?p ?o. filter(?s = <http://localhost/publications/articles/Journal1/1940/Article1>).}");
+        
+        // run the query
+        TupleQueryResult aResults = aQuery.evaluate();
+        
+        // print the results in tabular format
+        QueryResultIO.write(aResults, TextTableQueryResultWriter.FORMAT, System.out);
+        
+        // always close your query results!
+        aResults.close();
+        
+        // always close your connections!
+        aRepoConn.close();
+        
+        // make sure you shut down the repository as well as closing the repository connection as
+        // this is what releases the internal Stardog connection
+        aRepo.shutDown();
     }
     
     /**
