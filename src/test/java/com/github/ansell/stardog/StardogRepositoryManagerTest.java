@@ -21,10 +21,12 @@ import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFWriterFactory;
 import org.openrdf.rio.RDFWriterRegistry;
 
+
 // import com.complexible.common.protocols.server.Server;
 import com.complexible.stardog.Stardog;
 import com.complexible.stardog.api.ConnectionConfiguration;
 import com.complexible.stardog.api.ConnectionPoolConfig;
+import com.complexible.stardog.api.admin.AdminConnection;
 import com.complexible.stardog.api.admin.AdminConnectionConfiguration;
 import com.complexible.stardog.protocols.snarl.SNARLProtocolConstants;
 
@@ -43,6 +45,10 @@ public class StardogRepositoryManagerTest
     @Before
     public void setUp() throws Exception
     {
+        String aServerUrl = "http://ppodd1-cbr.it.csiro.au:5820";
+        
+        AdminConnection aAdminConnection = AdminConnectionConfiguration.toServer(aServerUrl).credentials("admin", "testAdminPassword").connect();
+        
         RDFWriterRegistry instance = RDFWriterRegistry.getInstance();
         
         Set<RDFFormat> keys = instance.getKeys();
@@ -75,9 +81,9 @@ public class StardogRepositoryManagerTest
     @Test
     public void testCreateSystemRepository() throws Exception
     {
-        URL serverUrl = new URL("snarl://localhost/test-db");
+        URL serverUrl = new URL("http://ppodd1-cbr.it.csiro.au:5820/test-db");
         
-        ConnectionConfiguration connConn = ConnectionConfiguration.to("test-db").server("localhost");
+        ConnectionConfiguration connConn = ConnectionConfiguration.to("test-db").server("ppodd1-cbr.it.csiro.au");
         
         AdminConnectionConfiguration adminConn = AdminConnectionConfiguration.toEmbeddedServer();
         
