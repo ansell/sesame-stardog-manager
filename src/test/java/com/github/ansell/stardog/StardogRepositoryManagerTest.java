@@ -51,8 +51,6 @@ public class StardogRepositoryManagerTest
     
     // private Server aServer;
     
-    private AdminConnectionConfiguration aAdminConnection;
-    private ConnectionConfiguration connConn;
     private StardogRepositoryManager testRepositoryManager;
     private String aServerUrl;
     
@@ -64,7 +62,8 @@ public class StardogRepositoryManagerTest
     {
         aServerUrl = "snarl://ppodd1-cbr.it.csiro.au:5820";
         
-        aAdminConnection = AdminConnectionConfiguration.toServer(aServerUrl).credentials("admin", "testAdminPassword");
+        AdminConnectionConfiguration aAdminConnection =
+                AdminConnectionConfiguration.toServer(aServerUrl).credentials("admin", "testAdminPassword");
         
         // Warning, make sure this is not a production server instance before running these tests
         // Will change this to default to not happen once some initial tests are working
@@ -75,7 +74,7 @@ public class StardogRepositoryManagerTest
             connect.drop(nextRepo);
         }
         
-        connConn = ConnectionConfiguration.to(aServerUrl).credentials("admin", "testAdminPassword");
+        connect.close();
         
         RDFParserRegistry parsers = RDFParserRegistry.getInstance();
         
@@ -99,7 +98,7 @@ public class StardogRepositoryManagerTest
             System.out.println(format.getClass().getName());
         }
         
-        testRepositoryManager = new StardogRepositoryManager(aAdminConnection, connConn);
+        testRepositoryManager = new StardogRepositoryManager(aServerUrl, "admin", "testAdminPassword");
         testRepositoryManager.initialize();
         
         // FIXME: Once Maven is working with the server modules enable this to avoid connecting to a
@@ -199,7 +198,7 @@ public class StardogRepositoryManagerTest
     @Test
     public void testCleanUpRepository() throws Exception
     {
-        assertTrue(testRepositoryManager.removeRepository("SYSTEM"));
+        testRepositoryManager.removeRepository("SYSTEM");
         testRepositoryManager.cleanUpRepository("SYSTEM");
         
         Collection<RepositoryInfo> allRepositoryInfosAfter = testRepositoryManager.getAllRepositoryInfos(true);

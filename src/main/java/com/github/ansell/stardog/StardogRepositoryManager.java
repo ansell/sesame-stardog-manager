@@ -30,14 +30,27 @@ import com.complexible.stardog.sesame.StardogRepository;
  */
 public class StardogRepositoryManager extends RepositoryManager
 {
-    private AdminConnectionConfiguration adminConn;
-    private ConnectionConfiguration connConn;
+    private String serverUrl;
+    private String username;
+    private String password;
     
-    public StardogRepositoryManager(AdminConnectionConfiguration adminConn, ConnectionConfiguration connConn)
+    public StardogRepositoryManager(String serverUrl, String username, String password)
     {
         super(new ConcurrentHashMap<String, Repository>());
-        this.adminConn = adminConn;
-        this.connConn = connConn;
+        
+        this.serverUrl = serverUrl;
+        this.username = username;
+        this.password = password;
+    }
+    
+    private AdminConnectionConfiguration getAdminConn()
+    {
+        return AdminConnectionConfiguration.toServer(serverUrl).credentials(username, password);
+    }
+    
+    private ConnectionConfiguration getConnConn(String databaseName)
+    {
+        return ConnectionConfiguration.to(databaseName).server(serverUrl).credentials(username, password);
     }
     
     @Override
@@ -48,7 +61,7 @@ public class StardogRepositoryManager extends RepositoryManager
         {
             try
             {
-                AdminConnection connect = adminConn.connect();
+                AdminConnection connect = getAdminConn().connect();
                 
                 connect.disk("SYSTEM").create();
                 
@@ -59,7 +72,7 @@ public class StardogRepositoryManager extends RepositoryManager
                 throw new RepositoryException(e);
             }
         }
-        Repository aRepo = new StardogRepository(connConn.copy().database("SYSTEM"));
+        Repository aRepo = new StardogRepository(getConnConn("SYSTEM"));
         aRepo.initialize();
         return aRepo;
         
@@ -71,17 +84,18 @@ public class StardogRepositoryManager extends RepositoryManager
         AdminConnection connect = null;
         try
         {
-            connect = adminConn.connect();
+            connect = getAdminConn().connect();
             for(String nextRepo : connect.list())
             {
                 if(nextRepo.equals(id))
                 {
-                    StardogRepository aRepo = new StardogRepository(connConn.copy().database(id));
+                    StardogRepository aRepo = new StardogRepository(getConnConn(id));
                     aRepo.initialize();
                     return aRepo;
                 }
             }
-            StardogRepository aRepo = new StardogRepository(connect.disk(id).create());
+            ConnectionConfiguration create = getAdminConn().connect().disk(id).create().credentials(username, password);
+            StardogRepository aRepo = new StardogRepository(create);
             aRepo.initialize();
             return aRepo;
         }
@@ -108,9 +122,12 @@ public class StardogRepositoryManager extends RepositoryManager
     @Override
     public RepositoryInfo getRepositoryInfo(String id) throws RepositoryException
     {
+        AdminConnection connect = null;
         try
         {
-            for(String nextRepo : adminConn.connect().list())
+            connect = getAdminConn().connect();
+            
+            for(String nextRepo : connect.list())
             {
                 if(nextRepo.equals(id))
                 {
@@ -130,16 +147,33 @@ public class StardogRepositoryManager extends RepositoryManager
         {
             throw new RepositoryException(e);
         }
+        finally
+        {
+            if(connect != null)
+            {
+                try
+                {
+                    connect.close();
+                }
+                catch(StardogException e)
+                {
+                    throw new RepositoryException(e);
+                }
+            }
+        }
     }
     
     @Override
     public Collection<RepositoryInfo> getAllRepositoryInfos(boolean skipSystemRepo) throws RepositoryException
     {
+        AdminConnection connect = null;
         try
         {
+            connect = getAdminConn().connect();
+            
             Collection<RepositoryInfo> result = new ArrayList<RepositoryInfo>();
             
-            for(String nextRepo : adminConn.connect().list())
+            for(String nextRepo : connect.list())
             {
                 if(skipSystemRepo && nextRepo.equals(SystemRepository.ID))
                 {
@@ -160,18 +194,48 @@ public class StardogRepositoryManager extends RepositoryManager
         {
             throw new RepositoryException(e);
         }
+        finally
+        {
+            if(connect != null)
+            {
+                try
+                {
+                    connect.close();
+                }
+                catch(StardogException e)
+                {
+                    throw new RepositoryException(e);
+                }
+            }
+        }
     }
     
     @Override
     protected void cleanUpRepository(String repositoryID) throws IOException
     {
+        AdminConnection connect = null;
         try
         {
-            adminConn.connect().drop(repositoryID);
+            connect = getAdminConn().connect();
+            connect.drop(repositoryID);
         }
         catch(StardogException e)
         {
             throw new IOException(e);
+        }
+        finally
+        {
+            if(connect != null)
+            {
+                try
+                {
+                    connect.close();
+                }
+                catch(StardogException e)
+                {
+                    throw new IOException(e);
+                }
+            }
         }
     }
     
