@@ -67,25 +67,42 @@ public class StardogRepositoryManager extends RepositoryManager
     }
     
     @Override
-    protected Repository createRepository(String id) throws RepositoryConfigException, RepositoryException
+    protected StardogRepository createRepository(String id) throws RepositoryConfigException, RepositoryException
     {
+        AdminConnection connect = null;
         try
         {
-            for(String nextRepo : adminConn.connect().list())
+            connect = adminConn.connect();
+            for(String nextRepo : connect.list())
             {
                 if(nextRepo.equals(id))
                 {
-                    Repository aRepo = new StardogRepository(connConn.copy().database(id));
+                    StardogRepository aRepo = new StardogRepository(connConn.copy().database(id));
                     aRepo.initialize();
                     return aRepo;
                 }
             }
-            
-            return null;
+            StardogRepository aRepo = new StardogRepository(connect.disk(id).create());
+            aRepo.initialize();
+            return aRepo;
         }
         catch(StardogException e)
         {
             throw new RepositoryException(e);
+        }
+        finally
+        {
+            if(connect != null)
+            {
+                try
+                {
+                    connect.close();
+                }
+                catch(StardogException e)
+                {
+                    throw new RepositoryException(e);
+                }
+            }
         }
     }
     
@@ -136,6 +153,7 @@ public class StardogRepositoryManager extends RepositoryManager
                 // TODO: How do we know what URL adminConn/connConn are using from their public
                 // methods?
                 // result.setLocation(url);
+                result.add(nextResult);
             }
             return result;
         }

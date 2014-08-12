@@ -8,6 +8,7 @@ import static org.junit.Assert.*;
 import java.net.MalformedURLException;
 import java.net.SocketAddress;
 import java.net.URL;
+import java.util.Collection;
 import java.util.Set;
 
 import io.netty.channel.local.LocalAddress;
@@ -17,7 +18,12 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.openrdf.repository.Repository;
+import org.openrdf.repository.RepositoryException;
+import org.openrdf.repository.config.RepositoryConfigException;
+import org.openrdf.repository.manager.RepositoryInfo;
 import org.openrdf.rio.RDFFormat;
+import org.openrdf.rio.RDFParserFactory;
+import org.openrdf.rio.RDFParserRegistry;
 import org.openrdf.rio.RDFWriterFactory;
 import org.openrdf.rio.RDFWriterRegistry;
 
@@ -28,6 +34,7 @@ import com.complexible.stardog.api.ConnectionPoolConfig;
 import com.complexible.stardog.api.admin.AdminConnection;
 import com.complexible.stardog.api.admin.AdminConnectionConfiguration;
 import com.complexible.stardog.protocols.snarl.SNARLProtocolConstants;
+import com.complexible.stardog.sesame.StardogRepository;
 
 /**
  * @author ans025
@@ -63,13 +70,24 @@ public class StardogRepositoryManagerTest
         
         connConn = ConnectionConfiguration.to(aServerUrl);
         
-        RDFWriterRegistry instance = RDFWriterRegistry.getInstance();
+        RDFParserRegistry parsers = RDFParserRegistry.getInstance();
         
-        Set<RDFFormat> keys = instance.getKeys();
+        Set<RDFFormat> parserKeys = parsers.getKeys();
         
-        System.out.println(keys);
+        System.out.println(parserKeys);
         
-        for(RDFWriterFactory format : instance.getAll())
+        for(RDFParserFactory format : parsers.getAll())
+        {
+            System.out.println(format.getClass().getName());
+        }
+        
+        RDFWriterRegistry writers = RDFWriterRegistry.getInstance();
+        
+        Set<RDFFormat> writerKeys = writers.getKeys();
+        
+        System.out.println(writerKeys);
+        
+        for(RDFWriterFactory format : writers.getAll())
         {
             System.out.println(format.getClass().getName());
         }
@@ -111,35 +129,57 @@ public class StardogRepositoryManagerTest
      * Test method for
      * {@link com.github.ansell.stardog.StardogRepositoryManager#createRepository(java.lang.String)}
      * .
+     * 
+     * @throws Exception
      */
-    @Ignore("TODO: Implement me")
     @Test
-    public void testCreateRepository()
+    public void testCreateRepository() throws Exception
     {
-        fail("Not yet implemented");
+        StardogRepository testRepository = testRepositoryManager.createRepository("testrepository123");
+        
+        assertNotNull(testRepository);
     }
     
     /**
      * Test method for
      * {@link com.github.ansell.stardog.StardogRepositoryManager#getRepositoryInfo(java.lang.String)}
      * .
+     * 
+     * @throws Exception
      */
-    @Ignore("TODO: Implement me")
     @Test
-    public void testGetRepositoryInfo()
+    public void testGetRepositoryInfo() throws Exception
     {
-        fail("Not yet implemented");
+        RepositoryInfo repositoryInfo = testRepositoryManager.getRepositoryInfo("SYSTEM");
+        assertNotNull(repositoryInfo);
+        assertEquals("SYSTEM", repositoryInfo.getId());
     }
     
     /**
      * Test method for
      * {@link com.github.ansell.stardog.StardogRepositoryManager#getAllRepositoryInfos(boolean)}.
+     * 
+     * @throws Exception
      */
-    @Ignore("TODO: Implement me")
     @Test
-    public void testGetAllRepositoryInfosBoolean()
+    public void testGetAllRepositoryInfosBoolean() throws Exception
     {
-        fail("Not yet implemented");
+        Collection<RepositoryInfo> allRepositoryInfos = testRepositoryManager.getAllRepositoryInfos(true);
+        // Only expect system repository and have excluded it in the call above
+        assertTrue(allRepositoryInfos.isEmpty());
+        
+        Collection<RepositoryInfo> allRepositoryInfosAndSystem = testRepositoryManager.getAllRepositoryInfos(false);
+        assertEquals(1, allRepositoryInfosAndSystem.size());
+        
+        StardogRepository testRepository = testRepositoryManager.createRepository("testrepository123");
+        assertNotNull(testRepository);
+        
+        Collection<RepositoryInfo> allRepositoryInfosAfter = testRepositoryManager.getAllRepositoryInfos(true);
+        assertEquals(1, allRepositoryInfosAfter.size());
+        
+        Collection<RepositoryInfo> allRepositoryInfosAndSystemAfter =
+                testRepositoryManager.getAllRepositoryInfos(false);
+        assertEquals(2, allRepositoryInfosAndSystemAfter.size());
     }
     
     /**
