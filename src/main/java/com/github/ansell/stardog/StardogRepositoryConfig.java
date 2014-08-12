@@ -69,7 +69,7 @@ public class StardogRepositoryConfig extends RepositoryImplConfigBase
             new ConcurrentHashMap<>();
     
     /**
-     * Properties that have unique URI values
+     * Properties that have unique {@link URI} values
      */
     public static final ConcurrentMap<ConfigProperty<URI>, URI> URI_PROPS = new ConcurrentHashMap<>();
     
@@ -80,12 +80,12 @@ public class StardogRepositoryConfig extends RepositoryImplConfigBase
             new ConcurrentHashMap<>();
     
     /**
-     * Properties that have multiple URI values
+     * Properties that have multiple {@link URI} values
      */
     public static final ConcurrentMap<ConfigProperty<Collection<URI>>, URI> MULTI_URI_PROPS = new ConcurrentHashMap<>();
     
     /**
-     * Properties that have multiple Namespace values
+     * Properties that have multiple {@link Namespace} values
      */
     public static final ConcurrentMap<ConfigProperty<Collection<Namespace>>, URI> MULTI_NAMESPACE_PROPS =
             new ConcurrentHashMap<>();
