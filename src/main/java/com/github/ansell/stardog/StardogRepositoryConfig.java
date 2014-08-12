@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import org.openrdf.model.BNode;
 import org.openrdf.model.Graph;
 import org.openrdf.model.Literal;
 import org.openrdf.model.Namespace;
@@ -20,6 +21,7 @@ import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.model.util.GraphUtil;
 import org.openrdf.model.util.GraphUtilException;
 import org.openrdf.model.util.Namespaces;
+import org.openrdf.model.vocabulary.XMLSchema;
 import org.openrdf.repository.config.RepositoryConfigException;
 import org.openrdf.repository.config.RepositoryImplConfig;
 import org.openrdf.repository.config.RepositoryImplConfigBase;
@@ -123,7 +125,7 @@ public class StardogRepositoryConfig extends RepositoryImplConfigBase
     private final ConcurrentMap<ConfigProperty<ReasoningType>, ReasoningType> reasoningTypeProps =
             new ConcurrentHashMap<>();
     
-    private final ConcurrentMap<ConfigProperty<Collection<String>>, Set<Literal>> multiStringProps =
+    private final ConcurrentMap<ConfigProperty<Collection<String>>, Set<String>> multiStringProps =
             new ConcurrentHashMap<>();
     
     private final ConcurrentMap<ConfigProperty<URI>, URI> uriProps = new ConcurrentHashMap<>();
@@ -148,6 +150,89 @@ public class StardogRepositoryConfig extends RepositoryImplConfigBase
     public Resource export(Graph graph)
     {
         Resource node = super.export(graph);
+        
+        for(Entry<ConfigProperty<URI>, URI> entry : URI_PROPS.entrySet())
+        {
+            if(uriProps.containsKey(entry.getKey()))
+            {
+                graph.add(node, entry.getValue(), uriProps.get(entry.getKey()));
+            }
+        }
+        
+        for(Entry<ConfigProperty<Boolean>, URI> entry : BOOLEAN_PROPS.entrySet())
+        {
+            if(booleanProps.containsKey(entry.getKey()))
+            {
+                graph.add(node, entry.getValue(),
+                        graph.getValueFactory().createLiteral(booleanProps.get(entry.getKey())));
+            }
+        }
+        
+        for(Entry<ConfigProperty<String>, URI> entry : STRING_PROPS.entrySet())
+        {
+            if(stringProps.containsKey(entry.getKey()))
+            {
+                graph.add(node, entry.getValue(), graph.getValueFactory()
+                        .createLiteral(stringProps.get(entry.getKey())));
+            }
+        }
+        
+        for(Entry<ConfigProperty<Duration>, URI> entry : DURATION_PROPS.entrySet())
+        {
+            if(durationProps.containsKey(entry.getKey()))
+            {
+                graph.add(node, entry.getValue(),
+                        graph.getValueFactory().createLiteral(durationProps.get(entry.getKey()).toString()));
+            }
+        }
+        
+        for(Entry<ConfigProperty<ReasoningType>, URI> entry : REASONING_TYPE_PROPS.entrySet())
+        {
+            if(reasoningTypeProps.containsKey(entry.getKey()))
+            {
+                graph.add(node, entry.getValue(),
+                        graph.getValueFactory().createLiteral(reasoningTypeProps.get(entry.getKey()).name()));
+            }
+        }
+        
+        for(Entry<ConfigProperty<Collection<URI>>, URI> entry : MULTI_URI_PROPS.entrySet())
+        {
+            if(multiUriProps.containsKey(entry.getKey()))
+            {
+                for(URI nextURI : multiUriProps.get(entry.getKey()))
+                {
+                    graph.add(node, entry.getValue(), nextURI);
+                }
+            }
+        }
+        
+        for(Entry<ConfigProperty<Collection<String>>, URI> entry : MULTI_STRING_PROPS.entrySet())
+        {
+            if(multiStringProps.containsKey(entry.getKey()))
+            {
+                for(String nextString : multiStringProps.get(entry.getKey()))
+                {
+                    graph.add(node, entry.getValue(),
+                            graph.getValueFactory().createLiteral(nextString, XMLSchema.STRING));
+                }
+            }
+        }
+        
+        for(Entry<ConfigProperty<Collection<Namespace>>, URI> entry : MULTI_NAMESPACE_PROPS.entrySet())
+        {
+            if(multiNamespaceProps.containsKey(entry.getKey()))
+            {
+                for(Namespace nextString : multiNamespaceProps.get(entry.getKey()))
+                {
+                    BNode innerNode = graph.getValueFactory().createBNode();
+                    graph.add(node, entry.getValue(), innerNode);
+                    graph.add(innerNode, NAMESPACE_PREFIX_URI,
+                            graph.getValueFactory().createLiteral(nextString.getPrefix(), XMLSchema.STRING));
+                    graph.add(innerNode, NAMESPACE_NAME_URI,
+                            graph.getValueFactory().createLiteral(nextString.getName(), XMLSchema.STRING));
+                }
+            }
+        }
         
         return node;
     }
@@ -218,7 +303,7 @@ public class StardogRepositoryConfig extends RepositoryImplConfigBase
                 Literal literal = GraphUtil.getOptionalObjectLiteral(graph, implNode, entry.getValue());
                 if(literal != null)
                 {
-                    setMultiStringProp(entry.getKey(), literal);
+                    setMultiStringProp(entry.getKey(), literal.getLabel());
                 }
             }
             
@@ -235,7 +320,7 @@ public class StardogRepositoryConfig extends RepositoryImplConfigBase
         }
         catch(GraphUtilException e)
         {
-            throw new RepositoryConfigException(e.getMessage(), e);
+            throw new RepositoryConfigException(e);
         }
         
     }
@@ -300,7 +385,7 @@ public class StardogRepositoryConfig extends RepositoryImplConfigBase
         }
     }
     
-    private void setMultiStringProp(ConfigProperty<Collection<String>> key, Literal literal)
+    private void setMultiStringProp(ConfigProperty<Collection<String>> key, String literal)
     {
         if(literal == null)
         {
