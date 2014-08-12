@@ -347,12 +347,19 @@ public class StardogRepositoryManagerTest
     
     /**
      * Test method for {@link org.openrdf.repository.manager.RepositoryManager#getRepositoryIDs()}.
+     * @throws Exception 
      */
-    @Ignore("TODO: Implement me")
     @Test
-    public void testGetRepositoryIDs()
+    public void testGetRepositoryIDs() throws Exception
     {
-        fail("Not yet implemented");
+        Set<String> repositoryIDs = testRepositoryManager.getRepositoryIDs();
+        assertEquals(1, repositoryIDs.size());
+        
+        StardogRepository testRepository = testRepositoryManager.createRepository("testrepository123");
+        assertNotNull(testRepository);
+        
+        Set<String> repositoryIDs2 = testRepositoryManager.getRepositoryIDs();
+        assertEquals(2, repositoryIDs2.size());
     }
     
     /**

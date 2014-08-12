@@ -8,6 +8,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.openrdf.repository.Repository;
@@ -339,6 +341,35 @@ public class StardogRepositoryManager extends RepositoryManager
     public boolean hasRepositoryConfig(String repositoryID) throws RepositoryException, RepositoryConfigException
     {
         return getRepositoryInfo(repositoryID) != null;
+    }
+    
+    @Override
+    public Set<String> getRepositoryIDs() throws RepositoryException
+    {
+        AdminConnection connect = null;
+        try
+        {
+            connect = getAdminConn().connect();
+            return new LinkedHashSet<>(connect.list());
+        }
+        catch(StardogException e)
+        {
+            throw new RepositoryException(e);
+        }
+        finally
+        {
+            if(connect != null)
+            {
+                try
+                {
+                    connect.close();
+                }
+                catch(StardogException e)
+                {
+                    throw new RepositoryException(e);
+                }
+            }
+        }
     }
     
 }
