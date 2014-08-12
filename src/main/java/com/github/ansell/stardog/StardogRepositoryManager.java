@@ -334,4 +334,11 @@ public class StardogRepositoryManager extends RepositoryManager
         
         return baseName + index;
     }
+    
+    @Override
+    public boolean hasRepositoryConfig(String repositoryID) throws RepositoryException, RepositoryConfigException
+    {
+        return getRepositoryInfo(repositoryID) != null;
+    }
+    
 }

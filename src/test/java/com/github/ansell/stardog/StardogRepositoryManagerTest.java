@@ -359,12 +359,21 @@ public class StardogRepositoryManagerTest
      * Test method for
      * {@link org.openrdf.repository.manager.RepositoryManager#hasRepositoryConfig(java.lang.String)}
      * .
+     * 
+     * @throws Exception
      */
-    @Ignore("TODO: Implement me")
     @Test
-    public void testHasRepositoryConfig()
+    public void testHasRepositoryConfig() throws Exception
     {
-        fail("Not yet implemented");
+        boolean hasRepositoryConfig = testRepositoryManager.hasRepositoryConfig("SYSTEM");
+        assertTrue(hasRepositoryConfig);
+        
+        boolean hasRepositoryConfig2 = testRepositoryManager.hasRepositoryConfig("testdatabase");
+        assertFalse(hasRepositoryConfig2);
+        
+        testRepositoryManager.createRepository("testdatabase");
+        boolean hasRepositoryConfig3 = testRepositoryManager.hasRepositoryConfig("testdatabase");
+        assertTrue(hasRepositoryConfig3);
     }
     
     /**
