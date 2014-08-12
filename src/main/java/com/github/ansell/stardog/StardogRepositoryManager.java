@@ -284,4 +284,54 @@ public class StardogRepositoryManager extends RepositoryManager
         
         return isRemoved;
     }
+    
+    @Override
+    public String getNewRepositoryID(String baseName) throws RepositoryException, RepositoryConfigException
+    {
+        if(baseName != null)
+        {
+            // Filter exotic characters from the base name
+            baseName = baseName.trim();
+            
+            int length = baseName.length();
+            StringBuilder buffer = new StringBuilder(length);
+            
+            for(char c : baseName.toCharArray())
+            {
+                if(Character.isLetter(c) || Character.isDigit(c) || c == '_')
+                {
+                    // Convert to lower case since file names are case insensitive on
+                    // some/most platforms
+                    buffer.append(Character.toLowerCase(c));
+                }
+            }
+            
+            baseName = buffer.toString();
+        }
+        
+        // First try if we can use the base name without an appended index
+        if(baseName != null && baseName.length() > 0 && !hasRepositoryConfig(baseName))
+        {
+            return baseName;
+        }
+        
+        // When the base name is null or empty, generate one
+        if(baseName == null || baseName.length() == 0)
+        {
+            baseName = "repository-";
+        }
+        else if(!baseName.endsWith("_"))
+        {
+            baseName += "_";
+        }
+        
+        // Keep appending numbers until we find an unused ID
+        int index = 2;
+        while(hasRepositoryConfig(baseName + index))
+        {
+            index++;
+        }
+        
+        return baseName + index;
+    }
 }
