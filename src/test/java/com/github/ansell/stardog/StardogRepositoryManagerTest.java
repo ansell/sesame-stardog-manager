@@ -24,6 +24,7 @@ import org.openrdf.query.resultio.QueryResultIO;
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
+import org.openrdf.repository.config.RepositoryConfig;
 import org.openrdf.repository.config.RepositoryConfigException;
 import org.openrdf.repository.manager.RepositoryInfo;
 import org.openrdf.rio.RDFFormat;
@@ -347,7 +348,8 @@ public class StardogRepositoryManagerTest
     
     /**
      * Test method for {@link org.openrdf.repository.manager.RepositoryManager#getRepositoryIDs()}.
-     * @throws Exception 
+     * 
+     * @throws Exception
      */
     @Test
     public void testGetRepositoryIDs() throws Exception
@@ -387,12 +389,15 @@ public class StardogRepositoryManagerTest
      * Test method for
      * {@link org.openrdf.repository.manager.RepositoryManager#getRepositoryConfig(java.lang.String)}
      * .
+     * 
+     * @throws Exception
      */
-    @Ignore("TODO: Implement me")
     @Test
-    public void testGetRepositoryConfig()
+    public void testGetRepositoryConfig() throws Exception
     {
-        fail("Not yet implemented");
+        RepositoryConfig repositoryConfig = testRepositoryManager.getRepositoryConfig("SYSTEM");
+        
+        assertNotNull(repositoryConfig);
     }
     
     /**

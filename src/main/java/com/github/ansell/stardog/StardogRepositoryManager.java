@@ -14,6 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryException;
+import org.openrdf.repository.config.RepositoryConfig;
 import org.openrdf.repository.config.RepositoryConfigException;
 import org.openrdf.repository.config.RepositoryConfigUtil;
 import org.openrdf.repository.manager.RepositoryInfo;
@@ -24,6 +25,7 @@ import com.complexible.stardog.StardogException;
 import com.complexible.stardog.api.ConnectionConfiguration;
 import com.complexible.stardog.api.admin.AdminConnection;
 import com.complexible.stardog.api.admin.AdminConnectionConfiguration;
+import com.complexible.stardog.metadata.MetaProperty;
 import com.complexible.stardog.sesame.StardogRepository;
 
 /**
@@ -351,6 +353,37 @@ public class StardogRepositoryManager extends RepositoryManager
         {
             connect = getAdminConn().connect();
             return new LinkedHashSet<>(connect.list());
+        }
+        catch(StardogException e)
+        {
+            throw new RepositoryException(e);
+        }
+        finally
+        {
+            if(connect != null)
+            {
+                try
+                {
+                    connect.close();
+                }
+                catch(StardogException e)
+                {
+                    throw new RepositoryException(e);
+                }
+            }
+        }
+    }
+    
+    @Override
+    public RepositoryConfig getRepositoryConfig(String repositoryID) throws RepositoryConfigException,
+        RepositoryException
+    {
+        AdminConnection connect = null;
+        try
+        {
+            connect = getAdminConn().connect();
+            
+            return null;
         }
         catch(StardogException e)
         {
