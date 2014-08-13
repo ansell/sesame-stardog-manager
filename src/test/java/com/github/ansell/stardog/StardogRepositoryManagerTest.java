@@ -17,6 +17,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.openrdf.model.impl.LinkedHashModel;
 import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.TupleQuery;
 import org.openrdf.query.TupleQueryResult;
@@ -32,6 +33,7 @@ import org.openrdf.rio.RDFParserFactory;
 import org.openrdf.rio.RDFParserRegistry;
 import org.openrdf.rio.RDFWriterFactory;
 import org.openrdf.rio.RDFWriterRegistry;
+import org.openrdf.rio.Rio;
 
 import com.complexible.common.rdf.query.resultio.TextTableQueryResultWriter;
 // import com.complexible.common.protocols.server.Server;
@@ -398,6 +400,15 @@ public class StardogRepositoryManagerTest
         RepositoryConfig repositoryConfig = testRepositoryManager.getRepositoryConfig("SYSTEM");
         
         assertNotNull(repositoryConfig);
+        
+        LinkedHashModel exportGraph = new LinkedHashModel();
+        repositoryConfig.export(exportGraph);
+        
+        assertEquals(23, exportGraph.size());
+        Rio.write(exportGraph, System.out, RDFFormat.NQUADS);
+        
+        assertEquals(5, exportGraph.filter(null, StardogRepositoryConfig.NAMESPACE_NAME_URI, null).size());
+        assertEquals(5, exportGraph.filter(null, StardogRepositoryConfig.NAMESPACE_PREFIX_URI, null).size());
     }
     
     /**

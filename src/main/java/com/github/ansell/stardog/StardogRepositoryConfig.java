@@ -227,7 +227,7 @@ public class StardogRepositoryConfig extends RepositoryImplConfigBase
         {
             if(stringProps.containsKey(entry.getKey()))
             {
-                graph.add(node, entry.getValue(), vf.createLiteral(stringProps.get(entry.getKey())));
+                graph.add(node, entry.getValue(), vf.createLiteral(stringProps.get(entry.getKey()), XMLSchema.STRING));
             }
         }
         
