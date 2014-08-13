@@ -72,7 +72,7 @@ public class StardogRepositoryManagerTest
     @Before
     public void setUp() throws Exception
     {
-        aServerUrl = "snarl://ppodd1-cbr.it.csiro.au:5820";
+        aServerUrl = System.getProperty("stardog-instance", "snarl://localhost:5820");
         
         AdminConnectionConfiguration aAdminConnection =
                 AdminConnectionConfiguration.toServer(aServerUrl).credentials("admin", "testAdminPassword");
