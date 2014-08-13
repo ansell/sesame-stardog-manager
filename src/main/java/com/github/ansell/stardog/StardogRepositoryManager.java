@@ -26,6 +26,7 @@ import com.complexible.stardog.api.ConnectionConfiguration;
 import com.complexible.stardog.api.admin.AdminConnection;
 import com.complexible.stardog.api.admin.AdminConnectionConfiguration;
 import com.complexible.stardog.metadata.MetaProperty;
+import com.complexible.stardog.metadata.Metadata;
 import com.complexible.stardog.sesame.StardogRepository;
 
 /**
@@ -382,6 +383,17 @@ public class StardogRepositoryManager extends RepositoryManager
         try
         {
             connect = getAdminConn().connect();
+            
+            for(String nextRepository : connect.list())
+            {
+                if(nextRepository.equals(repositoryID))
+                {
+                    Metadata metadata = connect.get(repositoryID, StardogRepositoryConfig.allConfigProps());
+                    StardogRepositoryConfig config = new StardogRepositoryConfig();
+                    config.setMetadata(metadata);
+                    return new RepositoryConfig(nextRepository, config);
+                }
+            }
             
             return null;
         }

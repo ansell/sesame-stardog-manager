@@ -4,6 +4,7 @@
 package com.github.ansell.stardog;
 
 import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -30,6 +31,8 @@ import com.complexible.stardog.db.DatabaseOptions;
 import com.complexible.stardog.index.IndexOptions;
 import com.complexible.stardog.index.IndexOptions.IndexType;
 import com.complexible.stardog.metadata.ConfigProperty;
+import com.complexible.stardog.metadata.MetaProperty;
+import com.complexible.stardog.metadata.Metadata;
 import com.complexible.stardog.reasoning.api.ReasoningType;
 
 /**
@@ -340,7 +343,7 @@ public class StardogRepositoryConfig extends RepositoryImplConfigBase
                 Literal literal = GraphUtil.getOptionalObjectLiteral(graph, implNode, entry.getValue());
                 if(literal != null)
                 {
-                    setStringProp(entry.getKey(), literal);
+                    setStringProp(entry.getKey(), literal.getLabel());
                 }
             }
             
@@ -419,7 +422,7 @@ public class StardogRepositoryConfig extends RepositoryImplConfigBase
         }
     }
     
-    private void setStringProp(ConfigProperty<String> key, Literal literal)
+    private void setStringProp(ConfigProperty<String> key, String literal)
     {
         if(literal == null)
         {
@@ -427,7 +430,7 @@ public class StardogRepositoryConfig extends RepositoryImplConfigBase
         }
         else
         {
-            this.stringProps.put(key, literal.getLabel());
+            this.stringProps.put(key, literal);
         }
     }
     
@@ -537,5 +540,102 @@ public class StardogRepositoryConfig extends RepositoryImplConfigBase
         {
             this.multiNamespaceProps.computeIfAbsent(key, k -> ConcurrentHashMap.newKeySet()).add(uri);
         }
+    }
+    
+    /**
+     * 
+     * @return All known {@link ConfigProperty} instances that we support for translation to and
+     *         from RDF statements.
+     */
+    public static final Set<ConfigProperty<?>> allConfigProps()
+    {
+        Set<ConfigProperty<?>> result = new LinkedHashSet<>();
+        
+        result.addAll(INTEGER_PROPS.keySet());
+        result.addAll(LONG_PROPS.keySet());
+        result.addAll(STRING_PROPS.keySet());
+        result.addAll(DURATION_PROPS.keySet());
+        result.addAll(REASONING_TYPE_PROPS.keySet());
+        result.addAll(INDEX_TYPE_PROPS.keySet());
+        result.addAll(URI_PROPS.keySet());
+        result.addAll(MULTI_STRING_PROPS.keySet());
+        result.addAll(MULTI_URI_PROPS.keySet());
+        result.addAll(MULTI_NAMESPACE_PROPS.keySet());
+        
+        return result;
+    }
+    
+    public void setMetadata(final Metadata metadata)
+    {
+        INTEGER_PROPS.entrySet().forEach(e -> {
+            if(metadata.contains(e.getKey()))
+            {
+                setIntegerProp(e.getKey(), metadata.get(e.getKey()));
+            }
+        });
+        LONG_PROPS.entrySet().forEach(e -> {
+            if(metadata.contains(e.getKey()))
+            {
+                setLongProp(e.getKey(), metadata.get(e.getKey()));
+            }
+        });
+        STRING_PROPS.entrySet().forEach(e -> {
+            if(metadata.contains(e.getKey()))
+            {
+                setStringProp(e.getKey(), metadata.get(e.getKey()));
+            }
+        });
+        DURATION_PROPS.entrySet().forEach(e -> {
+            if(metadata.contains(e.getKey()))
+            {
+                setDurationProp(e.getKey(), metadata.get(e.getKey()));
+            }
+        });
+        REASONING_TYPE_PROPS.entrySet().forEach(e -> {
+            if(metadata.contains(e.getKey()))
+            {
+                setReasoningTypeProp(e.getKey(), metadata.get(e.getKey()));
+            }
+        });
+        INDEX_TYPE_PROPS.entrySet().forEach(e -> {
+            if(metadata.contains(e.getKey()))
+            {
+                setIndexTypeProp(e.getKey(), metadata.get(e.getKey()));
+            }
+        });
+        URI_PROPS.entrySet().forEach(e -> {
+            if(metadata.contains(e.getKey()))
+            {
+                setURIProp(e.getKey(), metadata.get(e.getKey()));
+            }
+        });
+        MULTI_STRING_PROPS.entrySet().forEach(e -> {
+            if(metadata.contains(e.getKey()))
+            {
+                for(String nextString : metadata.get(e.getKey()))
+                {
+                    setMultiStringProp(e.getKey(), nextString);
+                }
+            }
+        });
+        MULTI_URI_PROPS.entrySet().forEach(e -> {
+            if(metadata.contains(e.getKey()))
+            {
+                for(URI nextURI : metadata.get(e.getKey()))
+                {
+                    setMultiURIProp(e.getKey(), nextURI);
+                }
+            }
+        });
+        MULTI_NAMESPACE_PROPS.entrySet().forEach(e -> {
+            if(metadata.contains(e.getKey()))
+            {
+                for(Namespace nextNamespace : metadata.get(e.getKey()))
+                {
+                    setMultiNamespaceProp(e.getKey(), nextNamespace);
+                }
+            }
+        });
+        
     }
 }
