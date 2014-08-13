@@ -81,12 +81,17 @@ public class StardogRepositoryManagerTest
         // Will change this to default to not happen once some initial tests are working
         AdminConnection connect = aAdminConnection.connect();
         
-        for(String nextRepo : connect.list())
+        try
         {
-            connect.drop(nextRepo);
+            for(String nextRepo : connect.list())
+            {
+                connect.drop(nextRepo);
+            }
         }
-        
-        connect.close();
+        finally
+        {
+            connect.close();
+        }
         
         RDFParserRegistry parsers = RDFParserRegistry.getInstance();
         
