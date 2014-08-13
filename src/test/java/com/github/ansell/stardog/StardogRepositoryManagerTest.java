@@ -20,6 +20,7 @@ import org.junit.Test;
 import org.openrdf.model.Graph;
 import org.openrdf.model.Model;
 import org.openrdf.model.Resource;
+import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.LinkedHashModel;
 import org.openrdf.model.util.GraphUtil;
@@ -34,6 +35,7 @@ import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.config.RepositoryConfig;
 import org.openrdf.repository.config.RepositoryConfigException;
+import org.openrdf.repository.config.RepositoryConfigSchema;
 import org.openrdf.repository.manager.RepositoryInfo;
 import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFParserFactory;
@@ -417,17 +419,22 @@ public class StardogRepositoryManagerTest
         assertEquals(5, exportGraph.filter(null, StardogRepositoryConfig.NAMESPACE_NAME_URI, null).size());
         assertEquals(5, exportGraph.filter(null, StardogRepositoryConfig.NAMESPACE_PREFIX_URI, null).size());
         
-        Resource topNode = GraphUtil.getUniqueSubject(exportGraph, RDF.TYPE, null);
+        Resource topNode = GraphUtil.getUniqueSubject(exportGraph, RDF.TYPE, RepositoryConfigSchema.REPOSITORY);
         
-        StardogRepositoryConfig test = new StardogRepositoryConfig();
-        test.parse(exportGraph, topNode);
+        System.out.println(topNode);
+        
+        RepositoryConfig imported = new RepositoryConfig();
+        imported.parse(exportGraph, topNode);
+        
+        // StardogRepositoryConfig test = new StardogRepositoryConfig();
+        // test.parse(exportGraph, topNode);
         
         Model secondExport = new LinkedHashModel();
-        test.export(secondExport);
+        imported.export(secondExport);
         
         assertEquals(23, secondExport.size());
         System.out.println("Round-tripped configuration...");
-        Rio.write(exportGraph, System.out, RDFFormat.NQUADS);
+        Rio.write(secondExport, System.out, RDFFormat.NQUADS);
         
         // Test round-tripping of the configuration
         assertTrue(ModelUtil.equals(exportGraph, secondExport));

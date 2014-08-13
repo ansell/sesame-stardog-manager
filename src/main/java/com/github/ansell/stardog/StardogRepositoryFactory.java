@@ -35,8 +35,7 @@ public class StardogRepositoryFactory implements RepositoryFactory
     @Override
     public RepositoryImplConfig getConfig()
     {
-        // TODO Auto-generated method stub
-        return null;
+        return new StardogRepositoryConfig();
     }
     
     @Override

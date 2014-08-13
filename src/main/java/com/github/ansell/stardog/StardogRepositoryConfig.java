@@ -388,19 +388,25 @@ public class StardogRepositoryConfig extends RepositoryImplConfigBase
             
             for(Entry<ConfigProperty<Collection<Namespace>>, URI> entry : MULTI_NAMESPACE_PROPS.entrySet())
             {
-                graph.match(implNode, entry.getValue(), null).forEachRemaining(s -> {
-                    Resource object = (Resource)s.getObject();
-                    try
-                    {
-                        Literal prefix = GraphUtil.getOptionalObjectLiteral(graph, object, NAMESPACE_PREFIX_URI);
-                        Literal name = GraphUtil.getOptionalObjectLiteral(graph, object, NAMESPACE_NAME_URI);
-                        setMultiNamespaceProp(entry.getKey(), new NamespaceImpl(prefix.getLabel(), name.getLabel()));
-                    }
-                    catch(GraphUtilException e)
-                    {
-                        throw new RuntimeException(e);
-                    }
-                });
+                graph.stream()
+                        .filter(s -> s.getSubject().equals(implNode) && s.getPredicate().equals(entry.getValue()))
+                        .forEach(s -> {
+                            // graph.match(implNode, entry.getValue(), null).forEachRemaining(s -> {
+                                Resource object = (Resource)s.getObject();
+                                try
+                                {
+                                    Literal prefix =
+                                            GraphUtil.getOptionalObjectLiteral(graph, object, NAMESPACE_PREFIX_URI);
+                                    Literal name =
+                                            GraphUtil.getOptionalObjectLiteral(graph, object, NAMESPACE_NAME_URI);
+                                    setMultiNamespaceProp(entry.getKey(),
+                                            new NamespaceImpl(prefix.getLabel(), name.getLabel()));
+                                }
+                                catch(GraphUtilException e)
+                                {
+                                    throw new RuntimeException(e);
+                                }
+                            });
             }
         }
         catch(GraphUtilException e)
