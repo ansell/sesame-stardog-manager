@@ -15,12 +15,11 @@ import org.openrdf.model.Literal;
 import org.openrdf.model.Namespace;
 import org.openrdf.model.Resource;
 import org.openrdf.model.URI;
-import org.openrdf.model.Value;
+import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.NamespaceImpl;
 import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.model.util.GraphUtil;
 import org.openrdf.model.util.GraphUtilException;
-import org.openrdf.model.util.Namespaces;
 import org.openrdf.model.vocabulary.XMLSchema;
 import org.openrdf.repository.config.RepositoryConfigException;
 import org.openrdf.repository.config.RepositoryImplConfig;
@@ -29,6 +28,7 @@ import org.openrdf.repository.config.RepositoryImplConfigBase;
 import com.complexible.common.base.Duration;
 import com.complexible.stardog.db.DatabaseOptions;
 import com.complexible.stardog.index.IndexOptions;
+import com.complexible.stardog.index.IndexOptions.IndexType;
 import com.complexible.stardog.metadata.ConfigProperty;
 import com.complexible.stardog.reasoning.api.ReasoningType;
 
@@ -53,6 +53,16 @@ public class StardogRepositoryConfig extends RepositoryImplConfigBase
     public static final ConcurrentMap<ConfigProperty<Boolean>, URI> BOOLEAN_PROPS = new ConcurrentHashMap<>();
     
     /**
+     * Properties that have unique integer values.
+     */
+    public static final ConcurrentMap<ConfigProperty<Integer>, URI> INTEGER_PROPS = new ConcurrentHashMap<>();
+    
+    /**
+     * Properties that have unique long values.
+     */
+    public static final ConcurrentMap<ConfigProperty<Long>, URI> LONG_PROPS = new ConcurrentHashMap<>();
+    
+    /**
      * Properties that have unique string values.
      */
     public static final ConcurrentMap<ConfigProperty<String>, URI> STRING_PROPS = new ConcurrentHashMap<>();
@@ -67,6 +77,11 @@ public class StardogRepositoryConfig extends RepositoryImplConfigBase
      */
     public static final ConcurrentMap<ConfigProperty<ReasoningType>, URI> REASONING_TYPE_PROPS =
             new ConcurrentHashMap<>();
+    
+    /**
+     * Properties that have unique {@link IndexType} values.
+     */
+    public static final ConcurrentMap<ConfigProperty<IndexType>, URI> INDEX_TYPE_PROPS = new ConcurrentHashMap<>();
     
     /**
      * Properties that have unique {@link URI} values
@@ -120,18 +135,21 @@ public class StardogRepositoryConfig extends RepositoryImplConfigBase
         
         BOOLEAN_PROPS.put(IndexOptions.AUTO_STATS_UPDATE, vf.createURI(prefix, "autoStatsUpdate"));
         BOOLEAN_PROPS.put(IndexOptions.CANONICAL_LITERALS, vf.createURI(prefix, "canonicalLiterals"));
-        // IndexOptions.DIFF_INDEX_MAX_LIMIT;
-        // IndexOptions.DIFF_INDEX_MIN_LIMIT;
-        // IndexOptions.DIFF_INDEX_SIZE;
+        INTEGER_PROPS.put(IndexOptions.DIFF_INDEX_MAX_LIMIT, vf.createURI(prefix, "diffIndexMaxLimit"));
+        INTEGER_PROPS.put(IndexOptions.DIFF_INDEX_MIN_LIMIT, vf.createURI(prefix, "diffIndexMinLimit"));
+        LONG_PROPS.put(IndexOptions.INDEX_CONNECTION_TIMEOUT_MS, vf.createURI(prefix, "indexConnectionTimeoutMs"));
         // IndexOptions.HOME;
-        // IndexOptions.INDEX_CONNECTION_TIMEOUT_MS;
         BOOLEAN_PROPS.put(IndexOptions.INDEX_NAMED_GRAPHS, vf.createURI(prefix, "indexNamedGraphs"));
-        // IndexOptions.INDEX_TYPE;
+        INDEX_TYPE_PROPS.put(IndexOptions.INDEX_TYPE, vf.createURI(prefix, "indexType"));
         BOOLEAN_PROPS.put(IndexOptions.PERSIST, vf.createURI(prefix, "indexPersist"));
         BOOLEAN_PROPS.put(IndexOptions.SYNC, vf.createURI(prefix, "indexSync"));
     }
     
     private final ConcurrentMap<ConfigProperty<Boolean>, Boolean> booleanProps = new ConcurrentHashMap<>();
+    
+    private final ConcurrentMap<ConfigProperty<Integer>, Integer> integerProps = new ConcurrentHashMap<>();
+    
+    private final ConcurrentMap<ConfigProperty<Long>, Long> longProps = new ConcurrentHashMap<>();
     
     private final ConcurrentMap<ConfigProperty<String>, String> stringProps = new ConcurrentHashMap<>();
     
@@ -139,6 +157,8 @@ public class StardogRepositoryConfig extends RepositoryImplConfigBase
     
     private final ConcurrentMap<ConfigProperty<ReasoningType>, ReasoningType> reasoningTypeProps =
             new ConcurrentHashMap<>();
+    
+    private final ConcurrentMap<ConfigProperty<IndexType>, IndexType> indexTypeProps = new ConcurrentHashMap<>();
     
     private final ConcurrentMap<ConfigProperty<Collection<String>>, Set<String>> multiStringProps =
             new ConcurrentHashMap<>();
@@ -166,6 +186,7 @@ public class StardogRepositoryConfig extends RepositoryImplConfigBase
     public Resource export(Graph graph)
     {
         Resource node = super.export(graph);
+        ValueFactory vf = graph.getValueFactory();
         
         for(Entry<ConfigProperty<URI>, URI> entry : URI_PROPS.entrySet())
         {
@@ -179,8 +200,23 @@ public class StardogRepositoryConfig extends RepositoryImplConfigBase
         {
             if(booleanProps.containsKey(entry.getKey()))
             {
-                graph.add(node, entry.getValue(),
-                        graph.getValueFactory().createLiteral(booleanProps.get(entry.getKey())));
+                graph.add(node, entry.getValue(), vf.createLiteral(booleanProps.get(entry.getKey())));
+            }
+        }
+        
+        for(Entry<ConfigProperty<Integer>, URI> entry : INTEGER_PROPS.entrySet())
+        {
+            if(integerProps.containsKey(entry.getKey()))
+            {
+                graph.add(node, entry.getValue(), vf.createLiteral(integerProps.get(entry.getKey())));
+            }
+        }
+        
+        for(Entry<ConfigProperty<Long>, URI> entry : LONG_PROPS.entrySet())
+        {
+            if(longProps.containsKey(entry.getKey()))
+            {
+                graph.add(node, entry.getValue(), vf.createLiteral(longProps.get(entry.getKey())));
             }
         }
         
@@ -188,8 +224,7 @@ public class StardogRepositoryConfig extends RepositoryImplConfigBase
         {
             if(stringProps.containsKey(entry.getKey()))
             {
-                graph.add(node, entry.getValue(), graph.getValueFactory()
-                        .createLiteral(stringProps.get(entry.getKey())));
+                graph.add(node, entry.getValue(), vf.createLiteral(stringProps.get(entry.getKey())));
             }
         }
         
@@ -197,8 +232,7 @@ public class StardogRepositoryConfig extends RepositoryImplConfigBase
         {
             if(durationProps.containsKey(entry.getKey()))
             {
-                graph.add(node, entry.getValue(),
-                        graph.getValueFactory().createLiteral(durationProps.get(entry.getKey()).toString()));
+                graph.add(node, entry.getValue(), vf.createLiteral(durationProps.get(entry.getKey()).toString()));
             }
         }
         
@@ -206,8 +240,15 @@ public class StardogRepositoryConfig extends RepositoryImplConfigBase
         {
             if(reasoningTypeProps.containsKey(entry.getKey()))
             {
-                graph.add(node, entry.getValue(),
-                        graph.getValueFactory().createLiteral(reasoningTypeProps.get(entry.getKey()).name()));
+                graph.add(node, entry.getValue(), vf.createLiteral(reasoningTypeProps.get(entry.getKey()).name()));
+            }
+        }
+        
+        for(Entry<ConfigProperty<IndexType>, URI> entry : INDEX_TYPE_PROPS.entrySet())
+        {
+            if(indexTypeProps.containsKey(entry.getKey()))
+            {
+                graph.add(node, entry.getValue(), vf.createLiteral(indexTypeProps.get(entry.getKey()).name()));
             }
         }
         
@@ -228,8 +269,7 @@ public class StardogRepositoryConfig extends RepositoryImplConfigBase
             {
                 for(String nextString : multiStringProps.get(entry.getKey()))
                 {
-                    graph.add(node, entry.getValue(),
-                            graph.getValueFactory().createLiteral(nextString, XMLSchema.STRING));
+                    graph.add(node, entry.getValue(), vf.createLiteral(nextString, XMLSchema.STRING));
                 }
             }
         }
@@ -240,12 +280,11 @@ public class StardogRepositoryConfig extends RepositoryImplConfigBase
             {
                 for(Namespace nextString : multiNamespaceProps.get(entry.getKey()))
                 {
-                    BNode innerNode = graph.getValueFactory().createBNode();
+                    BNode innerNode = vf.createBNode();
                     graph.add(node, entry.getValue(), innerNode);
                     graph.add(innerNode, NAMESPACE_PREFIX_URI,
-                            graph.getValueFactory().createLiteral(nextString.getPrefix(), XMLSchema.STRING));
-                    graph.add(innerNode, NAMESPACE_NAME_URI,
-                            graph.getValueFactory().createLiteral(nextString.getName(), XMLSchema.STRING));
+                            vf.createLiteral(nextString.getPrefix(), XMLSchema.STRING));
+                    graph.add(innerNode, NAMESPACE_NAME_URI, vf.createLiteral(nextString.getName(), XMLSchema.STRING));
                 }
             }
         }
@@ -278,6 +317,24 @@ public class StardogRepositoryConfig extends RepositoryImplConfigBase
                 }
             }
             
+            for(Entry<ConfigProperty<Integer>, URI> entry : INTEGER_PROPS.entrySet())
+            {
+                Literal literal = GraphUtil.getOptionalObjectLiteral(graph, implNode, entry.getValue());
+                if(literal != null)
+                {
+                    setIntegerProp(entry.getKey(), literal.intValue());
+                }
+            }
+            
+            for(Entry<ConfigProperty<Long>, URI> entry : LONG_PROPS.entrySet())
+            {
+                Literal literal = GraphUtil.getOptionalObjectLiteral(graph, implNode, entry.getValue());
+                if(literal != null)
+                {
+                    setLongProp(entry.getKey(), literal.longValue());
+                }
+            }
+            
             for(Entry<ConfigProperty<String>, URI> entry : STRING_PROPS.entrySet())
             {
                 Literal literal = GraphUtil.getOptionalObjectLiteral(graph, implNode, entry.getValue());
@@ -305,33 +362,42 @@ public class StardogRepositoryConfig extends RepositoryImplConfigBase
                 }
             }
             
-            for(Entry<ConfigProperty<Collection<URI>>, URI> entry : MULTI_URI_PROPS.entrySet())
-            {
-                URI uri = GraphUtil.getOptionalObjectURI(graph, implNode, entry.getValue());
-                if(uri != null)
-                {
-                    setMultiURIProp(entry.getKey(), uri);
-                }
-            }
-            
-            for(Entry<ConfigProperty<Collection<String>>, URI> entry : MULTI_STRING_PROPS.entrySet())
+            for(Entry<ConfigProperty<IndexType>, URI> entry : INDEX_TYPE_PROPS.entrySet())
             {
                 Literal literal = GraphUtil.getOptionalObjectLiteral(graph, implNode, entry.getValue());
                 if(literal != null)
                 {
-                    setMultiStringProp(entry.getKey(), literal.getLabel());
+                    setIndexTypeProp(entry.getKey(), IndexType.valueOf(literal.getLabel()));
                 }
+            }
+            
+            for(Entry<ConfigProperty<Collection<URI>>, URI> entry : MULTI_URI_PROPS.entrySet())
+            {
+                graph.match(implNode, entry.getValue(), null).forEachRemaining(
+                        s -> setMultiURIProp(entry.getKey(), (URI)s.getObject()));
+            }
+            
+            for(Entry<ConfigProperty<Collection<String>>, URI> entry : MULTI_STRING_PROPS.entrySet())
+            {
+                graph.match(implNode, entry.getValue(), null).forEachRemaining(
+                        s -> setMultiStringProp(entry.getKey(), ((Literal)s.getObject()).getLabel()));
             }
             
             for(Entry<ConfigProperty<Collection<Namespace>>, URI> entry : MULTI_NAMESPACE_PROPS.entrySet())
             {
-                Resource literal = GraphUtil.getOptionalObjectResource(graph, implNode, entry.getValue());
-                if(literal != null)
-                {
-                    Literal prefix = GraphUtil.getOptionalObjectLiteral(graph, implNode, NAMESPACE_PREFIX_URI);
-                    Literal name = GraphUtil.getOptionalObjectLiteral(graph, implNode, NAMESPACE_NAME_URI);
-                    setMultiNamespaceProp(entry.getKey(), new NamespaceImpl(prefix.getLabel(), name.getLabel()));
-                }
+                graph.match(implNode, entry.getValue(), null).forEachRemaining(s -> {
+                    Resource object = (Resource)s.getObject();
+                    try
+                    {
+                        Literal prefix = GraphUtil.getOptionalObjectLiteral(graph, object, NAMESPACE_PREFIX_URI);
+                        Literal name = GraphUtil.getOptionalObjectLiteral(graph, object, NAMESPACE_NAME_URI);
+                        setMultiNamespaceProp(entry.getKey(), new NamespaceImpl(prefix.getLabel(), name.getLabel()));
+                    }
+                    catch(GraphUtilException e)
+                    {
+                        throw new RuntimeException(e);
+                    }
+                });
             }
         }
         catch(GraphUtilException e)
@@ -365,6 +431,30 @@ public class StardogRepositoryConfig extends RepositoryImplConfigBase
         }
     }
     
+    private void setIntegerProp(ConfigProperty<Integer> key, Integer literal)
+    {
+        if(literal == null)
+        {
+            this.integerProps.remove(key);
+        }
+        else
+        {
+            this.integerProps.put(key, literal);
+        }
+    }
+    
+    private void setLongProp(ConfigProperty<Long> key, Long literal)
+    {
+        if(literal == null)
+        {
+            this.longProps.remove(key);
+        }
+        else
+        {
+            this.longProps.put(key, literal);
+        }
+    }
+    
     private void setDurationProp(ConfigProperty<Duration> key, Duration literal)
     {
         if(literal == null)
@@ -386,6 +476,18 @@ public class StardogRepositoryConfig extends RepositoryImplConfigBase
         else
         {
             this.reasoningTypeProps.put(key, literal);
+        }
+    }
+    
+    private void setIndexTypeProp(ConfigProperty<IndexType> key, IndexType literal)
+    {
+        if(literal == null)
+        {
+            this.indexTypeProps.remove(key);
+        }
+        else
+        {
+            this.indexTypeProps.put(key, literal);
         }
     }
     
