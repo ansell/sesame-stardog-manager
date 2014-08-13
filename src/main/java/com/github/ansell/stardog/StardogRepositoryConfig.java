@@ -27,6 +27,11 @@ import org.openrdf.repository.config.RepositoryImplConfig;
 import org.openrdf.repository.config.RepositoryImplConfigBase;
 
 import com.complexible.common.base.Duration;
+import com.complexible.stardog.StardogException;
+import com.complexible.stardog.api.Connection;
+import com.complexible.stardog.api.ConnectionConfiguration;
+import com.complexible.stardog.api.admin.AdminConnection;
+import com.complexible.stardog.api.admin.AdminConnectionConfiguration;
 import com.complexible.stardog.db.DatabaseOptions;
 import com.complexible.stardog.index.IndexOptions;
 import com.complexible.stardog.index.IndexOptions.IndexType;
@@ -172,6 +177,12 @@ public class StardogRepositoryConfig extends RepositoryImplConfigBase
     
     private final ConcurrentMap<ConfigProperty<Collection<Namespace>>, Set<Namespace>> multiNamespaceProps =
             new ConcurrentHashMap<>();
+    
+    private String serverURL;
+    
+    private String username;
+    
+    private String password;
     
     public StardogRepositoryConfig()
     {
@@ -642,6 +653,99 @@ public class StardogRepositoryConfig extends RepositoryImplConfigBase
                 }
             }
         });
-        
     }
+    
+    public Metadata toMetadata()
+    {
+        Metadata result = Metadata.create();
+        
+        booleanProps.entrySet().forEach(e -> {
+            result.set(e.getKey(), e.getValue());
+        });
+        integerProps.entrySet().forEach(e -> {
+            result.set(e.getKey(), e.getValue());
+        });
+        longProps.entrySet().forEach(e -> {
+            result.set(e.getKey(), e.getValue());
+        });
+        stringProps.entrySet().forEach(e -> {
+            result.set(e.getKey(), e.getValue());
+        });
+        durationProps.entrySet().forEach(e -> {
+            result.set(e.getKey(), e.getValue());
+        });
+        reasoningTypeProps.entrySet().forEach(e -> {
+            result.set(e.getKey(), e.getValue());
+        });
+        indexTypeProps.entrySet().forEach(e -> {
+            result.set(e.getKey(), e.getValue());
+        });
+        multiStringProps.entrySet().forEach(e -> {
+            result.set(e.getKey(), e.getValue());
+        });
+        uriProps.entrySet().forEach(e -> {
+            result.set(e.getKey(), e.getValue());
+        });
+        multiUriProps.entrySet().forEach(e -> {
+            result.set(e.getKey(), e.getValue());
+        });
+        multiNamespaceProps.entrySet().forEach(e -> {
+            result.set(e.getKey(), e.getValue());
+        });
+        return result;
+    }
+    
+    public String getDatabaseName()
+    {
+        return stringProps.get(DatabaseOptions.NAME);
+    }
+    
+    public void setDatabaseName(String databaseName)
+    {
+        stringProps.put(DatabaseOptions.NAME, databaseName);
+    }
+    
+    public String getServerURL()
+    {
+        return this.serverURL;
+    }
+    
+    public void setServerURL(String serverURL)
+    {
+        this.serverURL = serverURL;
+    }
+    
+    public ConnectionConfiguration toConnectionConfiguration()
+    {
+        return ConnectionConfiguration.to(getDatabaseName()).server(getServerURL())
+                .credentials(getUsername(), getPassword());
+    }
+    
+    public void updateServerSettings(RepositoryImplConfig config) throws StardogException
+    {
+        AdminConnection connect =
+                AdminConnectionConfiguration.toServer(getServerURL()).credentials(getUsername(), getPassword())
+                        .connect();
+        try
+        {
+            Metadata newSettings = toMetadata();
+            // FIXME: Implement the following
+            // connect.set(getDatabaseName(), property, value);
+        }
+        finally
+        {
+            connect.close();
+        }
+    }
+    
+    private String getPassword()
+    {
+        return this.password;
+    }
+    
+    private String getUsername()
+    {
+        return this.username;
+    }
+    
 }

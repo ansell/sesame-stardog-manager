@@ -7,7 +7,11 @@ import org.openrdf.repository.Repository;
 import org.openrdf.repository.config.RepositoryConfigException;
 import org.openrdf.repository.config.RepositoryFactory;
 import org.openrdf.repository.config.RepositoryImplConfig;
+import org.openrdf.repository.http.HTTPRepository;
+import org.openrdf.repository.http.config.HTTPRepositoryConfig;
 
+import com.complexible.stardog.StardogException;
+import com.complexible.stardog.api.ConnectionConfiguration;
 import com.complexible.stardog.db.DatabaseOptions;
 import com.complexible.stardog.index.IndexOptions;
 import com.complexible.stardog.sesame.StardogRepository;
@@ -41,8 +45,27 @@ public class StardogRepositoryFactory implements RepositoryFactory
     @Override
     public Repository getRepository(RepositoryImplConfig config) throws RepositoryConfigException
     {
-        // TODO Auto-generated method stub
-        return null;
+        StardogRepository result = null;
+        
+        if(config instanceof StardogRepositoryConfig)
+        {
+            StardogRepositoryConfig stardogConfig = (StardogRepositoryConfig)config;
+            try
+            {
+                stardogConfig.updateServerSettings(config);
+            }
+            catch(StardogException e)
+            {
+                throw new RuntimeException(e);
+            }
+            ConnectionConfiguration theConfig = stardogConfig.toConnectionConfiguration();
+            result = new StardogRepository(theConfig);
+        }
+        else
+        {
+            throw new RepositoryConfigException("Invalid configuration class: " + config.getClass());
+        }
+        return result;
     }
     
 }
