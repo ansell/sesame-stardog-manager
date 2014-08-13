@@ -62,26 +62,47 @@ public class StardogRepositoryManager extends RepositoryManager
     @Override
     protected Repository createSystemRepository() throws RepositoryException
     {
-        RepositoryInfo repositoryInfo = getRepositoryInfo("SYSTEM");
-        if(repositoryInfo == null)
+        AdminConnection connect = null;
+        try
         {
-            try
+            connect = getAdminConn().connect();
+            
+            boolean found = false;
+            for(String nextDatabase : connect.list())
             {
-                AdminConnection connect = getAdminConn().connect();
-                
-                connect.disk("SYSTEM").create();
-                
-                connect.close();
+                if(nextDatabase.equals("SYSTEM"))
+                {
+                    found = true;
+                }
             }
-            catch(StardogException e)
+            
+            if(!found)
             {
-                throw new RepositoryException(e);
+                connect.disk("SYSTEM").create();
             }
         }
+        catch(StardogException e)
+        {
+            throw new RepositoryException(e);
+        }
+        finally
+        {
+            if(connect != null)
+            {
+                try
+                {
+                    connect.close();
+                }
+                catch(StardogException e)
+                {
+                    throw new RepositoryException(e);
+                }
+            }
+        }
+        
         Repository aRepo = new StardogRepository(getConnConn("SYSTEM"));
         aRepo.initialize();
         return aRepo;
-        
     }
     
     @Override
