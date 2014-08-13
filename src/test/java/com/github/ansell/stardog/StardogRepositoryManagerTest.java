@@ -17,7 +17,14 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.openrdf.model.Graph;
+import org.openrdf.model.Model;
+import org.openrdf.model.Resource;
+import org.openrdf.model.URI;
 import org.openrdf.model.impl.LinkedHashModel;
+import org.openrdf.model.util.GraphUtil;
+import org.openrdf.model.util.ModelUtil;
+import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.TupleQuery;
 import org.openrdf.query.TupleQueryResult;
@@ -401,7 +408,7 @@ public class StardogRepositoryManagerTest
         
         assertNotNull(repositoryConfig);
         
-        LinkedHashModel exportGraph = new LinkedHashModel();
+        Model exportGraph = new LinkedHashModel();
         repositoryConfig.export(exportGraph);
         
         assertEquals(23, exportGraph.size());
@@ -409,6 +416,21 @@ public class StardogRepositoryManagerTest
         
         assertEquals(5, exportGraph.filter(null, StardogRepositoryConfig.NAMESPACE_NAME_URI, null).size());
         assertEquals(5, exportGraph.filter(null, StardogRepositoryConfig.NAMESPACE_PREFIX_URI, null).size());
+        
+        Resource topNode = GraphUtil.getUniqueSubject(exportGraph, RDF.TYPE, null);
+        
+        StardogRepositoryConfig test = new StardogRepositoryConfig();
+        test.parse(exportGraph, topNode);
+        
+        Model secondExport = new LinkedHashModel();
+        test.export(secondExport);
+        
+        assertEquals(23, secondExport.size());
+        System.out.println("Round-tripped configuration...");
+        Rio.write(exportGraph, System.out, RDFFormat.NQUADS);
+        
+        // Test round-tripping of the configuration
+        assertTrue(ModelUtil.equals(exportGraph, secondExport));
     }
     
     /**
